@@ -16,13 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/good_morning_img" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-        </LinearLayout>
+            android:src="@drawable/good_night_img" />
 
     </FrameLayout>
 
@@ -44,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/gotham"
-                android:text="P2P "
+                android:text="P2P"
                 android:textColor="#ffffff"
                 android:textSize="32sp" />
 
@@ -65,19 +59,17 @@
                 android:text="聊天助手"
                 android:textColor="#ffffff"
                 android:textSize="32sp" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:layout_marginTop="2dp"
                 android:background="#deff00" />
 
-
-
         </LinearLayout>
 
 
     </LinearLayout>
-
 
     <TextView
         android:layout_width="wrap_content"
@@ -91,21 +83,6 @@
         android:textColor="#9affffff"
         android:textSize="10sp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="400dp"
-        android:orientation="vertical"
-        android:paddingLeft="170dp"
-        >
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/civ_user_image_act_login"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/iv_0" />
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -116,7 +93,6 @@
         android:orientation="vertical"
         android:paddingLeft="32dp"
         android:paddingRight="32dp">
-
 
 
         <android.support.design.widget.TextInputLayout
@@ -132,11 +108,11 @@
                 android:drawableRight="@drawable/ic_email_white_24dp"
                 android:fontFamily="@font/calibri"
                 android:hint="Email"
-                android:inputType="text"
+                android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
-                android:id="@+id/et_nickname_act_login"/>
+                android:id="@+id/UsernameReg"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
@@ -156,7 +132,26 @@
                 android:maxLines="1"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
-                android:id="@+id/et_nickname_act_passwd"/>
+                android:id="@+id/PasswordReg"/>
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColorHint="#96ffffff"
+            >
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:drawablePadding="16dp"
+                android:drawableRight="@drawable/ic_lock_white_24dp"
+                android:fontFamily="@font/calibri"
+                android:hint="PasswordAgain"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:id="@+id/PasswordRegAgain"/>
         </android.support.design.widget.TextInputLayout>
 
         <LinearLayout
@@ -173,12 +168,12 @@
                 android:layout_marginRight="16dp"
                 android:background="@drawable/buttonshapewhitebg"
                 android:fontFamily="@font/calibri"
-                android:text="登录"
+                android:text="已有账号"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 android:textColor="#96ffffff"
                 android:textSize="16dp"
-                android:id="@+id/btn_login_act_login"/>
+                android:id="@+id/BackToLogin"/>
 
             <Button
                 android:layout_width="wrap_content"
@@ -186,28 +181,18 @@
                 android:layout_marginLeft="16dp"
                 android:background="@drawable/buttonshapewhitebg"
                 android:fontFamily="@font/calibri"
-                android:text="注册"
+                android:text="提交"
                 android:textAllCaps="false"
                 android:textColor="#96ffffff"
                 android:textSize="16dp"
                 android:textStyle="bold"
-                android:id="@+id/btn_login_act_register"/>
+                android:id="@+id/submit"/>
 
 
         </LinearLayout>
 
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/calibri"
-            android:text="忘记密码?"
-            android:textAlignment="center"
-            android:textColor="#96ffffff"
-            android:textSize="16sp"
-            android:clickable="true"
-            android:id="@+id/forgetpwd"/>
+
 
 
     </LinearLayout>

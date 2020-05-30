@@ -2,6 +2,7 @@ package com.rdc.p2p.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -58,6 +59,9 @@ public class LoginActivity extends BaseActivity {
     EditText password;
     @BindView(R.id.btn_login_act_login)
     Button mBtnLogin;
+    @BindView(R.id.btn_login_act_register)
+    Button mBtnRegister;
+
 
     private List<ImageBean> mImageList;
     private int mSelectedImageId;
@@ -74,6 +78,7 @@ public class LoginActivity extends BaseActivity {
         getPermission(this);
         LitePal.getDatabase();
         DataSupport.deleteAll(MessageBean.class);
+
     }
 
     /**
@@ -170,6 +175,16 @@ public class LoginActivity extends BaseActivity {
                 }
             }
         });
+
+        // 点击按钮前往注册界面
+        mBtnRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LoginActivity.this,RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -184,4 +199,5 @@ public class LoginActivity extends BaseActivity {
         mSelectedImageId = imageId;
         Glide.with(this).load(ImageUtil.getImageResId(imageId)).into(mCivUserImage);
     }
+
 }

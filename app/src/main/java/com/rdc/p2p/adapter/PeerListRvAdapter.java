@@ -1,7 +1,10 @@
 package com.rdc.p2p.adapter;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.rdc.p2p.R;
+import com.rdc.p2p.activity.MainActivity;
 import com.rdc.p2p.base.BaseRecyclerViewAdapter;
 import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.PeerBean;
@@ -16,6 +20,8 @@ import com.rdc.p2p.util.ImageUtil;
 
 import butterknife.BindView;
 import de.hdodenhof.circleimageview.CircleImageView;
+import q.rorbin.badgeview.Badge;
+import q.rorbin.badgeview.QBadgeView;
 
 /**
  * Created by Lin Yaotian on 2018/5/16.
@@ -113,7 +119,7 @@ public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_peer_list,parent,false);
-        return new ItemHolder(view);
+        return new ItemHolder(view, parent.getContext());
     }
 
     @Override
@@ -131,9 +137,12 @@ public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
         TextView mTvRecentMessage;
         @BindView(R.id.tv_time_item_peer_list)
         TextView mTvTime;
+        Badge badge;
 
-        public ItemHolder(View itemView) {
+        public ItemHolder(View itemView, Context context) {
             super(itemView);
+            badge = new QBadgeView(context).bindTarget(itemView.findViewById(R.id.civ_user_image_item_peer_list));
+            badge.setBadgeNumber(5).setGravityOffset(0, 0, true).setBadgeGravity(Gravity.END | Gravity.TOP).setBadgeTextSize(10, true);
         }
 
         @Override
