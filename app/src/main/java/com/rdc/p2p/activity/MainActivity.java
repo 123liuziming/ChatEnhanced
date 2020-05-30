@@ -9,6 +9,7 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -29,9 +30,12 @@ import android.widget.TextView;
 import com.rdc.p2p.R;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
+import com.rdc.p2p.fragment.FragmentCommon;
 import com.rdc.p2p.fragment.PeerListFragment;
 import com.rdc.p2p.fragment.ScanDeviceFragment;
 import com.rdc.p2p.manager.SocketManager;
+import com.ycl.tabview.library.TabView;
+import com.ycl.tabview.library.TabViewChild;
 
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -58,8 +62,6 @@ public class MainActivity extends BaseActivity {
 //    TextView mTvPeerList;
 //    @BindView(R.id.ll_bottom_right_layout_act_main)
 //    LinearLayout mLlBottomRight;
-    @BindView(R.id.vp_act_main)
-    ViewPager mVpContent;
 
     private FragmentPagerAdapter mFragmentPagerAdapter;
     private boolean checking = true;// true 选中聊天列表 , false 选中 聊天室
@@ -84,11 +86,24 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TabView tabView= (TabView) findViewById(R.id.tabView);
+        //start add data
+        mPeerListFragment = new PeerListFragment();
+        List<TabViewChild> tabViewChildList=new ArrayList<>();
+        TabViewChild tabViewChild01=new TabViewChild(R.drawable.tab01_sel,R.drawable.tab01_unsel,"聊天",  mPeerListFragment);
+        TabViewChild tabViewChild02=new TabViewChild(R.drawable.tab02_sel,R.drawable.tab02_unsel,"群聊",  FragmentCommon.newInstance("群聊"));
+        TabViewChild tabViewChild05=new TabViewChild(R.drawable.tab05_sel,R.drawable.tab05_unsel,"我的",  FragmentCommon.newInstance("我的"));
+        tabViewChildList.add(tabViewChild01);
+        tabViewChildList.add(tabViewChild02);
+        tabViewChildList.add(tabViewChild05);
+        //end add data
+        tabView.setTabViewDefaultPosition(0);
+        tabView.setTabViewChild(tabViewChildList,getSupportFragmentManager());
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -120,8 +135,8 @@ public class MainActivity extends BaseActivity {
 //                new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open, R.string.close);
 //        mDrawerToggle.syncState();
 //        mDrawerLayout.addDrawerListener(mDrawerToggle);
-        mPeerListFragment = new PeerListFragment();
-        mFragmentPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        mFragmentPagerAdapter = new FragmentPagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
                 switch (position){
@@ -146,7 +161,8 @@ public class MainActivity extends BaseActivity {
                 return super.saveState();
             }
         };
-        mVpContent.setAdapter(mFragmentPagerAdapter);
+        //mVpContent.setAdapter(mFragmentPagerAdapter);
+
     }
 
     private void initToolbar() {

@@ -43,7 +43,6 @@ import android.widget.TextView;
 
 import com.rdc.p2p.R;
 import com.rdc.p2p.adapter.MsgRvAdapter;
-import com.rdc.p2p.adapter.PeerListRvAdapter$ItemHolder_ViewBinding;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.config.FileState;

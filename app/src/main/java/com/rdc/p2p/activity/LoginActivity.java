@@ -13,11 +13,15 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.UserBean;
+import com.rdc.p2p.fragment.FragmentCommon;
+import com.rdc.p2p.fragment.PeerListFragment;
 import com.rdc.p2p.fragment.ScanDeviceFragment;
 import com.rdc.p2p.fragment.SelectImageFragment;
 import com.rdc.p2p.R;
@@ -27,6 +31,8 @@ import com.rdc.p2p.bean.ImageBean;
 import com.rdc.p2p.util.ImageUtil;
 import com.rdc.p2p.util.NetUtil;
 import com.rdc.p2p.util.UserUtil;
+import com.ycl.tabview.library.TabView;
+import com.ycl.tabview.library.TabViewChild;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -48,6 +54,8 @@ public class LoginActivity extends BaseActivity {
     CircleImageView mCivUserImage;
     @BindView(R.id.et_nickname_act_login)
     EditText mEtNickname;
+    @BindView(R.id.et_nickname_act_passwd)
+    EditText password;
     @BindView(R.id.btn_login_act_login)
     Button mBtnLogin;
 
@@ -62,6 +70,7 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         EventBus.getDefault().register(this);
         super.onCreate(savedInstanceState);
+
         getPermission(this);
         LitePal.getDatabase();
         DataSupport.deleteAll(MessageBean.class);
