@@ -1,10 +1,46 @@
-# P2P Chat
-计算机网络的课程设计，一个基于局域网的 Android P2P 聊天系统，实现了发送文字、语音、图片、文件等消息。
-# 用户界面
-![未命名_meitu_0.jpg](https://upload-images.jianshu.io/upload_images/5643593-b07673c781071436.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+1. 关于注册登录
 
-![未命名_meitu_1.jpg](https://upload-images.jianshu.io/upload_images/5643593-e7fb8e98555f3968.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+   1. 界面需要改成输入账号和密码，还要新增一个注册页面(输入邮箱，用户名，密码，重复密码)[前端:**刘子明**]
+   2. 服务端需要有验证登录以及新增用户的API
 
-![未命名_meitu_2.jpg](https://upload-images.jianshu.io/upload_images/5643593-dad46d2a0f8fa14f.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+2. 关于新消息的提示
 
-![未命名_meitu_3.jpg](https://upload-images.jianshu.io/upload_images/5643593-a89edde74e305286.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+   1. 每次有未接收的消息头像左上角应该显示红点，点击阅读后红点消失[前端:**刘子明**]
+
+3. 关于聊天
+
+   1. 底部新增一个导航栏，分别是聊天，群聊，我三个栏目
+
+     1. 关于注册登录
+
+   1. 界面需要改成输入账号和密码，还要新增一个注册页面(输入邮箱，用户名，密码，重复密码)[前端:**刘子明**]
+   2. 服务端需要有验证登录以及新增用户的API
+
+2. 关于新消息的提示
+
+   1. 每次有未接收的消息头像左上角应该显示红点，点击阅读后红点消失[前端:**刘子明**]
+
+3. 关于聊天
+
+   1. 底部新增一个导航栏，分别是聊天，群聊，我三个栏目
+
+  ![](https://img-blog.csdnimg.cn/20200530141005664.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3MTA4ODc4,size_16,color_FFFFFF,t_70)
+
+   2. 聊天栏目大致与原app一致，在每次登录后要显示历史的聊天记录(原app每次登录后聊天记录都清空了)。退出后要把聊天记录存放到服务器端，本地可以有缓存的聊天文件。[前端:**刘子明，王子勤**]
+
+   3. 群聊栏目右上角有一个发起群聊按钮，点击后可以选择要加入群聊的人，创建完群聊后群聊列表中显示群名称。[前端:**乔伟杰，杨沛业**]
+
+   4. "我"页面可以改头像，改用户名，以及退出登录。服务端要有相应的修改的接口(头像服务端不用保存原始图片，只用记录ImageID(0-17))[前端:**王子勤**]
+
+
+4. 服务器端要记录所有用户以及群聊的聊天记录，用户聊天记录用邮箱号做index(邮箱号不允许改)
+
+   2. 聊天栏目大致与原app一致，在每次登录后要显示历史的聊天记录(原app每次登录后聊天记录都清空了)。退出后要把聊天记录存放到服务器端，本地可以有缓存的聊天文件。[前端:**刘子明，王子勤**]
+
+   3. 群聊栏目右上角有一个发起群聊按钮，点击后可以选择要加入群聊的人，创建完群聊后群聊列表中显示群名称。[前端:**乔伟杰，杨沛业**]
+
+   4. "我"页面可以改头像，改用户名，以及退出登录。服务端要有相应的修改的接口(头像服务端不用保存原始图片，只用记录ImageID(0-17))[前端:**王子勤**]
+
+  ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200530141031632.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM3MTA4ODc4,size_16,color_FFFFFF,t_70)
+
+4. 服务器端要记录所有用户以及群聊的聊天记录，用户聊天记录用邮箱号做index(邮箱号不允许改)
