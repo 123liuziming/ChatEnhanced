@@ -70,7 +70,6 @@ public abstract class BaseRecyclerViewAdapter<T> extends RecyclerView.Adapter {
             ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
-
         }
 
         protected abstract void bindView(T t);

@@ -110,7 +110,7 @@ public class ScanDeviceUtil {
      */
     public void scan() {
         mIpList.clear();
-        Log.d(TAG, "开始扫描设备,本机Ip为：" + mDevAddress);
+        //Log.d(TAG, "开始扫描设备,本机Ip为：" + mDevAddress);
         /**
          * 1.核心池大小 2.线程池最大线程数 3.表示线程没有任务执行时最多保持多久时间会终止
          * 4.参数keepAliveTime的时间单位，有7种取值,当前为毫秒
@@ -199,7 +199,7 @@ public class ScanDeviceUtil {
 //            Log.e("", "获取本地ip地址失败");
             e.printStackTrace();
         }
-//        Log.i(TAG, "本机IP:" + ipAddress);
+        Log.i(TAG, "本机IP:" + ipAddress);
         return ipAddress;
     }
 

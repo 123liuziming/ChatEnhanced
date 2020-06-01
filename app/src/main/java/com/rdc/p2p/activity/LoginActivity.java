@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.bean.MessageBean;
+import com.rdc.p2p.bean.MyDnsBean;
 import com.rdc.p2p.bean.UserBean;
 import com.rdc.p2p.fragment.FragmentCommon;
 import com.rdc.p2p.fragment.PeerListFragment;
@@ -74,10 +76,9 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         EventBus.getDefault().register(this);
         super.onCreate(savedInstanceState);
-
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getPermission(this);
-        LitePal.getDatabase();
-        DataSupport.deleteAll(MessageBean.class);
+        // DataSupport.deleteAll(MessageBean.class);
 
     }
 

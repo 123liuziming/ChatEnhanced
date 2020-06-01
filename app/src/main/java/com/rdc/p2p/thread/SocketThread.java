@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.bean.MessageBean;
+import com.rdc.p2p.bean.MyDnsBean;
 import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.bean.UserBean;
 import com.rdc.p2p.config.Constant;
@@ -19,7 +20,10 @@ import com.rdc.p2p.contract.PeerListContract;
 import com.rdc.p2p.listener.OnSocketSendCallback;
 import com.rdc.p2p.manager.SocketManager;
 import com.rdc.p2p.util.GsonUtil;
+import com.rdc.p2p.util.MyDnsUtil;
 import com.rdc.p2p.util.SDUtil;
+
+import org.litepal.crud.DataSupport;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -28,6 +32,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -38,7 +46,7 @@ public class SocketThread extends Thread {
     private static final int DESTROY = 0;
     private static final int DELAY_DESTROY = 1;
     private static final String TAG = "SocketThread";
-    private static final int DELAY_MILLIS = 1000*60*30;
+    private static final int DELAY_MILLIS = 1000 * 60 * 30;
     private Socket mSocket;
     private PeerListContract.Presenter mPresenter;
     private String mTargetIp;
@@ -59,21 +67,21 @@ public class SocketThread extends Thread {
         mIsFileReceived = new AtomicBoolean(true);
         mHandlerThread = new HandlerThread("HandlerThread");
         mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper()){
+        mHandler = new Handler(mHandlerThread.getLooper()) {
             @Override
             public void handleMessage(Message msg) {
-                switch (msg.what){
+                switch (msg.what) {
                     case DESTROY:
-                        Log.d(TAG, "handleMessage: 销毁"+mTargetIp);
-                        if (mTimeOutNeedDestroy){
-                          sendRequest(App.getUserBean(),Protocol.KEEP_USER);
-                        }else {
+                        Log.d(TAG, "handleMessage: 销毁" + mTargetIp);
+                        if (mTimeOutNeedDestroy) {
+                            sendRequest(App.getUserBean(), Protocol.KEEP_USER);
+                        } else {
                             mTimeOutNeedDestroy = true;
-                            mHandler.sendEmptyMessageDelayed(DESTROY,DELAY_MILLIS);
+                            mHandler.sendEmptyMessageDelayed(DESTROY, DELAY_MILLIS);
                         }
                         break;
                     case DELAY_DESTROY:
-                        Log.d(TAG, "handleMessage: 延迟销毁"+mTargetIp);
+                        Log.d(TAG, "handleMessage: 延迟销毁" + mTargetIp);
                         mTimeOutNeedDestroy = false;
                         break;
                 }
@@ -81,17 +89,18 @@ public class SocketThread extends Thread {
         };
     }
 
-    public void setOnSocketSendCallback(OnSocketSendCallback onSocketSendCallback){
+    public void setOnSocketSendCallback(OnSocketSendCallback onSocketSendCallback) {
         this.mOnSocketSendCallback = onSocketSendCallback;
     }
 
     /**
      * 发送消息
+     *
      * @param messageBean
      * @return
      */
-    public void sendMsg(MessageBean messageBean,int position){
-        while (!mIsFileReceived.get()){
+    public void sendMsg(MessageBean messageBean, int position) {
+        while (!mIsFileReceived.get()) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -99,10 +108,10 @@ public class SocketThread extends Thread {
                 messageBean.setFileState(FileState.SEND_FILE_ERROR);
                 messageBean.setSendStatus(Constant.SEND_MSG_ERROR);
                 messageBean.save();
-                if (mOnSocketSendCallback != null){
-                    if (messageBean.getMsgType() == Protocol.FILE){
-                        mOnSocketSendCallback.fileSending(position,messageBean);
-                    }else {
+                if (mOnSocketSendCallback != null) {
+                    if (messageBean.getMsgType() == Protocol.FILE) {
+                        mOnSocketSendCallback.fileSending(position, messageBean);
+                    } else {
                         mOnSocketSendCallback.sendMsgError(position);
                     }
                 }
@@ -112,13 +121,16 @@ public class SocketThread extends Thread {
         try {
             DataOutputStream dos = new DataOutputStream(mSocket.getOutputStream());
             dos.writeInt(messageBean.getMsgType());
-            switch (messageBean.getMsgType()){
+            switch (messageBean.getMsgType()) {
                 case Protocol.TEXT:
                     byte[] textBytes = messageBean.getText().getBytes();
                     dos.writeInt(textBytes.length);
                     dos.write(textBytes);
-                    if (mOnSocketSendCallback != null){
+                    if (mOnSocketSendCallback != null) {
                         messageBean.setSendStatus(Constant.SEND_MSG_FINISH);
+                        messageBean.setUserName(App.getUserBean().getNickName());
+                        messageBean.setUserIp(App.getMyIP());
+                        messageBean.getDate();
                         messageBean.save();
                         mOnSocketSendCallback.sendMsgSuccess(position);
                     }
@@ -130,8 +142,11 @@ public class SocketThread extends Thread {
                     byte[] bytes = new byte[size];
                     imageInputStream.read(bytes);
                     dos.write(bytes);
-                    if (mOnSocketSendCallback != null){
+                    if (mOnSocketSendCallback != null) {
                         messageBean.setSendStatus(Constant.SEND_MSG_FINISH);
+                        messageBean.setUserName(App.getUserBean().getNickName());
+                        messageBean.setUserIp(App.getMyIP());
+                        messageBean.getDate();
                         messageBean.save();
                         mOnSocketSendCallback.sendMsgSuccess(position);
                     }
@@ -144,8 +159,11 @@ public class SocketThread extends Thread {
                     audioInputStream.read(audioBytes);
                     dos.write(audioBytes);
                     dos.flush();
-                    if (mOnSocketSendCallback != null){
+                    if (mOnSocketSendCallback != null) {
                         messageBean.setSendStatus(Constant.SEND_MSG_FINISH);
+                        messageBean.setUserName(App.getUserBean().getNickName());
+                        messageBean.setUserIp(App.getMyIP());
+                        messageBean.getDate();
                         messageBean.save();
                         mOnSocketSendCallback.sendMsgSuccess(position);
                     }
@@ -161,31 +179,37 @@ public class SocketThread extends Thread {
                     int offset = 0;//每次写入长度
                     int count = 0;//次数
                     int denominator;//将总文件分为多少份传输
-                    if (fileSize < (1024*300)){
+                    if (fileSize < (1024 * 300)) {
                         denominator = 1;
-                    }else {
-                        denominator = fileSize / (1024*300);
+                    } else {
+                        denominator = fileSize / (1024 * 300);
                     }
                     messageBean.setFileState(FileState.SEND_FILE_ING);
-                    while (true){
+                    while (true) {
                         count++;
-                        dos.write(fileBytes,offset,fileSize / denominator);
-                        offset += fileSize/denominator;
-                        if (count == denominator){
-                            dos.write(fileBytes,offset,fileSize % denominator);
+                        dos.write(fileBytes, offset, fileSize / denominator);
+                        offset += fileSize / denominator;
+                        if (count == denominator) {
+                            dos.write(fileBytes, offset, fileSize % denominator);
                             dos.flush();
                             messageBean.setTransmittedSize(fileSize);
                             messageBean.setFileState(FileState.SEND_FILE_FINISH);
+                            messageBean.setUserName(App.getUserBean().getNickName());
+                            messageBean.setUserIp(App.getMyIP());
+                            messageBean.getDate();
                             messageBean.save();
-                            if (mOnSocketSendCallback != null){
-                                mOnSocketSendCallback.fileSending(position,messageBean);
+                            if (mOnSocketSendCallback != null) {
+                                mOnSocketSendCallback.fileSending(position, messageBean);
                             }
                             break;
                         }
+                        messageBean.setUserName(App.getUserBean().getNickName());
+                        messageBean.setUserIp(App.getMyIP());
+                        messageBean.getDate();
                         messageBean.setTransmittedSize(offset);
                         messageBean.save();
-                        if (mOnSocketSendCallback != null){
-                            mOnSocketSendCallback.fileSending(position,messageBean);
+                        if (mOnSocketSendCallback != null) {
+                            mOnSocketSendCallback.fileSending(position, messageBean);
                         }
                     }
                     break;
@@ -193,13 +217,16 @@ public class SocketThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
             mIsFileReceived.set(true);
+            messageBean.setUserName(App.getUserBean().getNickName());
+            messageBean.setUserIp(App.getMyIP());
             messageBean.setFileState(FileState.SEND_FILE_ERROR);
             messageBean.setSendStatus(Constant.SEND_MSG_ERROR);
+            messageBean.getDate();
             messageBean.save();
-            if (mOnSocketSendCallback != null){
-                if (messageBean.getMsgType() == Protocol.FILE){
-                    mOnSocketSendCallback.fileSending(position,messageBean);
-                }else {
+            if (mOnSocketSendCallback != null) {
+                if (messageBean.getMsgType() == Protocol.FILE) {
+                    mOnSocketSendCallback.fileSending(position, messageBean);
+                } else {
                     mOnSocketSendCallback.sendMsgError(position);
                 }
             }
@@ -208,16 +235,17 @@ public class SocketThread extends Thread {
 
     /**
      * 发送连接或连接响应请求
+     *
      * @param userBean
      * @param msgType
      * @return
      */
-    public boolean sendRequest(UserBean userBean, int msgType){
+    public boolean sendRequest(UserBean userBean, int msgType) {
         mHandler.sendEmptyMessage(DELAY_DESTROY);
         try {
             DataOutputStream dos = new DataOutputStream(mSocket.getOutputStream());
             dos.writeInt(msgType);
-            switch (msgType){
+            switch (msgType) {
                 case Protocol.CONNECT:
                     dos.writeUTF(GsonUtil.gsonToJson(userBean));
                     break;
@@ -233,44 +261,55 @@ public class SocketThread extends Thread {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return false ;
+            return false;
         }
         return true;
     }
 
 
-
     @Override
     public void run() {
-        mHandler.sendEmptyMessageDelayed(DESTROY,DELAY_MILLIS);
+        mHandler.sendEmptyMessageDelayed(DESTROY, DELAY_MILLIS);
+        MyDnsBean myDnsBean;
         try {
             DataInputStream dis = new DataInputStream(mSocket.getInputStream());
             //循环读取消息
-            while (true){
+            while (true) {
                 int type = dis.readInt();
                 mHandler.sendEmptyMessage(DELAY_DESTROY);
                 switch (type) {
                     case Protocol.DISCONNECT:
-                        Log.d(TAG, "Protocol disconnect ! ip="+ mTargetIp);
+                        Log.d(TAG, "Protocol disconnect ! ip=" + mTargetIp);
                         mKeepUser = false;
+                        DataSupport.deleteAll(MyDnsBean.class);
                         mSocket.close();
                         break;
                     case Protocol.CONNECT:
                         String u1 = dis.readUTF();
-                        mPresenter.addPeer(getPeer(u1));
+                        PeerBean peerInfo = getPeer(u1);
+                        // 找到曾经的聊天记录
+                        myDnsBean = new MyDnsBean(peerInfo.getUserIp(), peerInfo.getNickName());
+                        myDnsBean.save();
+                        List<MessageBean> allMessage = DataSupport.where("belongName = ? and userName = ?",peerInfo.getNickName(), App.getUserBean().getNickName()).find(MessageBean.class);
+                        setLatestMsg(allMessage, peerInfo);
                         //回复连接响应
-                        sendRequest(App.getUserBean(),Protocol.CONNECT_RESPONSE);
+                        sendRequest(App.getUserBean(), Protocol.CONNECT_RESPONSE);
                         break;
                     case Protocol.CONNECT_RESPONSE:
                         String u2 = dis.readUTF();
-                        mPresenter.addPeer(getPeer(u2));
+                        peerInfo = getPeer(u2);
+                        // 找到曾经的聊天记录
+                        myDnsBean = new MyDnsBean(peerInfo.getUserIp(), peerInfo.getNickName());
+                        myDnsBean.save();
+                        allMessage = DataSupport.where("belongName = ? and userName = ?",peerInfo.getNickName(), App.getUserBean().getNickName()).find(MessageBean.class);
+                        setLatestMsg(allMessage, peerInfo);
                         break;
                     case Protocol.KEEP_USER_RESPONSE:
                         mKeepUser = true;
                         mSocket.close();
                         break;
                     case Protocol.KEEP_USER:
-                        sendRequest(App.getUserBean(),Protocol.KEEP_USER_RESPONSE);
+                        sendRequest(App.getUserBean(), Protocol.KEEP_USER_RESPONSE);
                         mKeepUser = true;
                         break;
                     case Protocol.FILE_RECEIVED:
@@ -280,13 +319,15 @@ public class SocketThread extends Thread {
                         int textBytesLength = dis.readInt();
                         byte[] textBytes = new byte[textBytesLength];
                         dis.readFully(textBytes);
-                        String text = new String(textBytes,"utf-8");
-                        Log.d(TAG, "run: receive text:"+text);
-                        MessageBean textMsg = new MessageBean(mTargetIp);
-                        textMsg.setUserIp(mTargetIp);
+                        String text = new String(textBytes, "utf-8");
+                        Log.d(TAG, "run: receive text:" + text);
+                        MessageBean textMsg = MessageBean.getInstance(mTargetIp);
+                        textMsg.setUserName(App.getUserBean().getNickName());
+                        textMsg.setUserIp(mTargetIp);;
                         textMsg.setMsgType(Protocol.TEXT);
                         textMsg.setMine(false);
                         textMsg.setText(text);
+                        textMsg.getDate();
                         textMsg.save();
                         mPresenter.messageReceived(textMsg);
                         break;
@@ -294,13 +335,15 @@ public class SocketThread extends Thread {
                         int size = dis.readInt();
                         byte[] bytes = new byte[size];
                         dis.readFully(bytes);
-                        Log.d(TAG, "run: image size = "+size);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,size);
-                        MessageBean imageMsg = new MessageBean(mTargetIp);
+                        Log.d(TAG, "run: image size = " + size);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, size);
+                        MessageBean imageMsg = MessageBean.getInstance(mTargetIp);
+                        imageMsg.setUserName(App.getUserBean().getNickName());
                         imageMsg.setUserIp(mTargetIp);
                         imageMsg.setMine(false);
                         imageMsg.setMsgType(Protocol.IMAGE);
-                        imageMsg.setImagePath(SDUtil.saveBitmap(bitmap,System.currentTimeMillis()+"",".jpg"));
+                        imageMsg.setImagePath(SDUtil.saveBitmap(bitmap, System.currentTimeMillis() + "", ".jpg"));
+                        imageMsg.getDate();
                         imageMsg.save();
                         mPresenter.messageReceived(imageMsg);
                         break;
@@ -308,34 +351,37 @@ public class SocketThread extends Thread {
                         int audioSize = dis.readInt();
                         byte[] audioBytes = new byte[audioSize];
                         dis.readFully(audioBytes);
-                        MessageBean audioMsg = new MessageBean(mTargetIp);
+                        MessageBean audioMsg = MessageBean.getInstance(mTargetIp);
+                        audioMsg.setUserName(App.getUserBean().getNickName());
                         audioMsg.setUserIp(mTargetIp);
                         audioMsg.setMine(false);
                         audioMsg.setMsgType(Protocol.AUDIO);
-                        audioMsg.setAudioPath(SDUtil.saveAudio(audioBytes,System.currentTimeMillis()+""));
+                        audioMsg.setAudioPath(SDUtil.saveAudio(audioBytes, System.currentTimeMillis() + ""));
+                        audioMsg.getDate();
                         audioMsg.save();
                         mPresenter.messageReceived(audioMsg);
                         break;
                     case Protocol.FILE:
                         int fileSize = dis.readInt();
                         String fileName = dis.readUTF();//文件名，包括了文件类型(e.g: pic.jpg)
-                        Log.d(TAG, "run: 接收到一个文件="+fileName);
-                        byte[] fileBytes = new byte[1024*1024];
+                        Log.d(TAG, "run: 接收到一个文件=" + fileName);
+                        byte[] fileBytes = new byte[1024 * 1024];
                         //解析出文件名和类型
                         int dotIndex = fileName.lastIndexOf(".");
                         String fileType;//文件类型(e.g: .jpg)
                         String name;//文件名(e.g: pic)
-                        if (dotIndex != -1){
-                            fileType = fileName.substring(dotIndex,fileName.length());
-                            name = fileName.substring(0,dotIndex);
-                        }else {
+                        if (dotIndex != -1) {
+                            fileType = fileName.substring(dotIndex, fileName.length());
+                            name = fileName.substring(0, dotIndex);
+                        } else {
                             //解析不到文件类型
                             fileType = "";
                             name = fileName;
                         }
-                        File file = SDUtil.getMyAppFile(name,fileType);
-                        if (file != null){
-                            MessageBean fileMsg = new MessageBean(mTargetIp);
+                        File file = SDUtil.getMyAppFile(name, fileType);
+                        if (file != null) {
+                            MessageBean fileMsg = MessageBean.getInstance(mTargetIp);
+                            fileMsg.setUserName(App.getUserBean().getNickName());
                             fileMsg.setFilePath(file.getAbsolutePath());
                             fileMsg.setFileName(file.getName());
                             fileMsg.setFileSize(fileSize);
@@ -344,49 +390,50 @@ public class SocketThread extends Thread {
                             fileMsg.setUserIp(mTargetIp);
                             fileMsg.setMine(false);
                             fileMsg.setMsgType(Protocol.FILE);
+                            fileMsg.getDate();
                             fileMsg.save();
                             mPresenter.fileReceiving(fileMsg);
                             FileOutputStream fos = new FileOutputStream(file);
                             int transLen = 0;
                             int countBytes = 0;//计算传输的字节，达到一定数量才更新界面
                             int read;
-                            while(true){
+                            while (true) {
                                 read = dis.read(fileBytes);
                                 transLen += read;
                                 countBytes += read;
-                                if (read == -1){
+                                if (read == -1) {
                                     Log.d(TAG, "run: read=-1");
                                     //对方关闭
                                     fileMsg.setSendStatus(FileState.RECEIVE_FILE_ERROR);
-                                    fileMsg.saveOrUpdate("belongIp = ? and filePath = ?",fileMsg.getBelongIp(),fileMsg.getFilePath());
+                                    fileMsg.saveOrUpdate("belongName = ? and filePath = ?", fileMsg.getBelongName(), fileMsg.getFilePath());
                                     file.delete();
                                     mPresenter.fileReceiving(fileMsg);
-                                    sendRequest(App.getUserBean(),Protocol.FILE_RECEIVED);
+                                    sendRequest(App.getUserBean(), Protocol.FILE_RECEIVED);
                                     break;
                                 }
-                                fos.write(fileBytes,0, read);
-                                if (transLen == fileSize){
+                                fos.write(fileBytes, 0, read);
+                                if (transLen == fileSize) {
                                     fos.flush();
                                     fos.close();
                                     fileMsg = fileMsg.clone();
                                     fileMsg.setTransmittedSize(transLen);
                                     fileMsg.setFileState(FileState.RECEIVE_FILE_FINISH);
-                                    fileMsg.saveOrUpdate("belongIp = ? and filePath = ?",fileMsg.getBelongIp(),fileMsg.getFilePath());
+                                    fileMsg.saveOrUpdate("belongName = ? and filePath = ?", fileMsg.getBelongName(), fileMsg.getFilePath());
                                     mPresenter.fileReceiving(fileMsg);
-                                    sendRequest(App.getUserBean(),Protocol.FILE_RECEIVED);
+                                    sendRequest(App.getUserBean(), Protocol.FILE_RECEIVED);
                                     break;
                                 }
-                                if (countBytes >= 1024*300){
+                                if (countBytes >= 1024 * 300) {
                                     //每接收到300KB数据就更新一次界面
                                     fileMsg = fileMsg.clone();
                                     fileMsg.setTransmittedSize(transLen);
                                     fileMsg.setFileState(FileState.RECEIVE_FILE_ING);
-                                    fileMsg.saveOrUpdate("belongIp = ? and filePath = ?",fileMsg.getBelongIp(),fileMsg.getFilePath());
+                                    fileMsg.saveOrUpdate("belongName = ? and filePath = ?", fileMsg.getBelongName(), fileMsg.getFilePath());
                                     mPresenter.fileReceiving(fileMsg);
                                     countBytes = 0;
                                 }
                             }
-                        }else {
+                        } else {
                             mSocket.close();
                         }
                         break;
@@ -394,7 +441,7 @@ public class SocketThread extends Thread {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            if (!mKeepUser){
+            if (!mKeepUser) {
                 mPresenter.removePeer(mTargetIp);
             }
             SocketManager.getInstance().removeSocketByIp(mTargetIp);
@@ -405,6 +452,7 @@ public class SocketThread extends Thread {
 
     /**
      * 根据UserGson构造PeerBean
+     *
      * @param userGson User实体类对应的gson
      * @return PeerBean
      */
@@ -416,6 +464,20 @@ public class SocketThread extends Thread {
         peer.setUserImageId(userBean.getUserImageId());
         peer.setNickName(userBean.getNickName());
         return peer;
+    }
+
+    private void setLatestMsg(List<MessageBean> allMsg, PeerBean peerInfo) {
+        if (allMsg.size() != 0) {
+            MessageBean tmp = Collections.max(allMsg, new Comparator<MessageBean>() {
+                @Override
+                public int compare(MessageBean messageBean, MessageBean t1) {
+                    return messageBean.getDate().compareTo(t1.getDate());
+                }
+            });
+            peerInfo.setRecentMessage(tmp.getText());
+        }
+        mPresenter.addPeer(peerInfo);
+
     }
 
 //    private Message getDestroyMsg(){

@@ -137,6 +137,7 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void updateRecentMsg(RecentMsgEvent recentMsgEvent){
        mPeerListRvAdapter.updateItemText(recentMsgEvent.getText(),recentMsgEvent.getTargetIp());
+       mPeerListRvAdapter.addItemBadge(recentMsgEvent.getTargetIp());
     }
 
     public boolean isServerSocketConnected(){
@@ -165,6 +166,7 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
             @Override
             public void onItemClick(int position) {
                 PeerBean peerBean = mPeerListRvAdapter.getDataList().get(position);
+                mPeerListRvAdapter.clearItemBadge(position);
                 if (SocketManager.getInstance().isClosedSocket(peerBean.getUserIp())){
                     showToast("正在建立Socket连接！");
                     mPresenter.linkPeer(peerBean.getUserIp());
@@ -198,6 +200,7 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
     @Override
     public void messageReceived(MessageBean messageBean) {
         PeerBean peer = mPeerListRvAdapter.updateItemText(messageBean.getText(),messageBean.getUserIp());
+        peer = mPeerListRvAdapter.addItemBadge(messageBean.getUserIp());
         if (peer == null){
             showToast("收到成员列表以外的消息！");
         }else {
@@ -209,6 +212,7 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
     public void fileReceiving(MessageBean messageBean) {
         if (messageBean.getFileState() == FileState.RECEIVE_FILE_START){
             mPeerListRvAdapter.updateItemText(messageBean.getText(),messageBean.getUserIp());
+            mPeerListRvAdapter.addItemBadge(messageBean.getUserIp());
         }
         EventBus.getDefault().post(messageBean);
     }

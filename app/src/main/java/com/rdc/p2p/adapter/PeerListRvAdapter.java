@@ -1,6 +1,5 @@
 package com.rdc.p2p.adapter;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -12,9 +11,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.rdc.p2p.R;
-import com.rdc.p2p.activity.MainActivity;
 import com.rdc.p2p.base.BaseRecyclerViewAdapter;
-import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.util.ImageUtil;
 
@@ -29,12 +26,13 @@ import q.rorbin.badgeview.QBadgeView;
 public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
 
     /**
-     *根据IP删除指定item
+     * 根据IP删除指定item
+     *
      * @param ip
      */
-    public void removeItem(String ip){
+    public void removeItem(String ip) {
         int index = getIndexByIp(ip);
-        if (index != -1){
+        if (index != -1) {
             mDataList.remove(index);
             notifyItemRemoved(index);
         }
@@ -42,20 +40,22 @@ public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
 
     /**
      * 添加一个Item
+     *
      * @param peerBean
      */
-    public void addItem(PeerBean peerBean){
+    public void addItem(PeerBean peerBean) {
         mDataList.add(peerBean);
-        notifyItemRangeChanged(mDataList.size()-1,1);
+        notifyItemRangeChanged(mDataList.size() - 1, 1);
     }
 
     /**
      * 更新个Item的Text
+     *
      * @param text
      */
-    public PeerBean updateItemText(String text, String peerIp){
+    public PeerBean updateItemText(String text, String peerIp) {
         int index = getIndexByIp(peerIp);
-        if (index != -1){
+        if (index != -1) {
             PeerBean peer = getDataList().get(index);
             peer.setRecentMessage(text);
             notifyItemChanged(index);
@@ -64,14 +64,34 @@ public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
         return null;
     }
 
+    public PeerBean addItemBadge(String peerIp) {
+        int index = getIndexByIp(peerIp);
+        if (index != -1) {
+            PeerBean peer = getDataList().get(index);
+            peer.setMsgNum(peer.getMsgNum() + 1);
+            notifyItemChanged(index);
+            return peer;
+        }
+        return null;
+    }
+
+    public void clearItemBadge(int index) {
+        if (index != -1) {
+            PeerBean peer = getDataList().get(index);
+            peer.setMsgNum(0);
+            notifyItemChanged(index);
+        }
+    }
+
     /**
      * 根据ip获取PeerBean
+     *
      * @param peerIp
      * @return
      */
-    public PeerBean getItem(String peerIp){
+    public PeerBean getItem(String peerIp) {
         for (PeerBean peerBean : mDataList) {
-            if (peerBean.getUserIp().equals(peerIp)){
+            if (peerBean.getUserIp().equals(peerIp)) {
                 return peerBean;
             }
         }
@@ -80,12 +100,13 @@ public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
 
     /**
      * 更新某个Item
+     *
      * @param peerBean
      */
-    public void updateItem(PeerBean peerBean){
+    public void updateItem(PeerBean peerBean) {
         int index = getIndexByIp(peerBean.getUserIp());
-        if (index != -1){
-            mDataList.set(index,peerBean);
+        if (index != -1) {
+            mDataList.set(index, peerBean);
             notifyItemChanged(index);
         }
     }
@@ -93,21 +114,23 @@ public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
 
     /**
      * 是否存在某个Item
+     *
      * @param ip
      * @return
      */
-    public boolean isContained(String ip){
+    public boolean isContained(String ip) {
         return getIndexByIp(ip) != -1;
     }
 
     /**
      * 根据IP查询该成员在成员列表中的位置
+     *
      * @param ip
      * @return 成员的位置 ,如果找不到则返回 -1
      */
-    private int getIndexByIp(String ip){
+    private int getIndexByIp(String ip) {
         for (int i = 0; i < mDataList.size(); i++) {
-            if (mDataList.get(i).getUserIp().equals(ip)){
+            if (mDataList.get(i).getUserIp().equals(ip)) {
                 //找到成员的下标
                 return i;
             }
@@ -118,16 +141,16 @@ public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_peer_list,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_peer_list, parent, false);
         return new ItemHolder(view, parent.getContext());
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((ItemHolder)holder).bindView(mDataList.get(position));
+        ((ItemHolder) holder).bindView(mDataList.get(position));
     }
 
-    class ItemHolder extends BaseRvHolder{
+    class ItemHolder extends BaseRvHolder {
 
         @BindView(R.id.tv_nickname_item_peer_list)
         TextView mTvNickname;
@@ -137,12 +160,13 @@ public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
         TextView mTvRecentMessage;
         @BindView(R.id.tv_time_item_peer_list)
         TextView mTvTime;
+        // 通知小红点
         Badge badge;
 
         public ItemHolder(View itemView, Context context) {
             super(itemView);
             badge = new QBadgeView(context).bindTarget(itemView.findViewById(R.id.civ_user_image_item_peer_list));
-            badge.setBadgeNumber(5).setGravityOffset(0, 0, true).setBadgeGravity(Gravity.END | Gravity.TOP).setBadgeTextSize(10, true);
+            badge.setBadgeNumber(0).setGravityOffset(0, 0, true).setBadgeGravity(Gravity.END | Gravity.TOP).setBadgeTextSize(10, true);
         }
 
         @Override
@@ -152,6 +176,7 @@ public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
                     .load(ImageUtil.getImageResId(peerBean.getUserImageId())).into(mCivUserImage);
             mTvRecentMessage.setText(peerBean.getRecentMessage());
             mTvTime.setText(peerBean.getTime());
+            badge.setBadgeNumber(peerBean.getMsgNum());
         }
     }
 }

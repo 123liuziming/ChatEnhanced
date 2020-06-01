@@ -7,7 +7,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.rdc.p2p.bean.MyDnsBean;
+
 import org.greenrobot.eventbus.EventBus;
+import org.litepal.LitePal;
+import org.litepal.crud.DataSupport;
 
 import butterknife.ButterKnife;
 
@@ -27,6 +31,7 @@ public abstract class BaseActivity<T extends BasePresenter> extends AppCompatAct
         initData();
         initView();
         initListener();
+        LitePal.getDatabase();
     }
 
     @Override
@@ -34,6 +39,7 @@ public abstract class BaseActivity<T extends BasePresenter> extends AppCompatAct
         if (presenter != null) {
             presenter.detachView();
         }
+        //DataSupport.deleteAll(MyDnsBean.class);
         super.onDestroy();
     }
 

@@ -32,6 +32,7 @@ import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.fragment.FragmentCommon;
 import com.rdc.p2p.fragment.PeerListFragment;
+import com.rdc.p2p.fragment.PersonalDetailFragment;
 import com.rdc.p2p.fragment.ScanDeviceFragment;
 import com.rdc.p2p.manager.SocketManager;
 import com.ycl.tabview.library.TabView;
@@ -73,7 +74,7 @@ public class MainActivity extends BaseActivity {
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            switch (message.what){
+            switch (message.what) {
                 case 0:
 //                    mTvShow.append("\n"+message.obj.toString());
                     break;
@@ -86,19 +87,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        TabView tabView= (TabView) findViewById(R.id.tabView);
-        //start add data
-        mPeerListFragment = new PeerListFragment();
-        List<TabViewChild> tabViewChildList=new ArrayList<>();
-        TabViewChild tabViewChild01=new TabViewChild(R.drawable.tab01_sel,R.drawable.tab01_unsel,"聊天",  mPeerListFragment);
-        TabViewChild tabViewChild02=new TabViewChild(R.drawable.tab02_sel,R.drawable.tab02_unsel,"群聊",  FragmentCommon.newInstance("群聊"));
-        TabViewChild tabViewChild05=new TabViewChild(R.drawable.tab05_sel,R.drawable.tab05_unsel,"我的",  FragmentCommon.newInstance("我的"));
-        tabViewChildList.add(tabViewChild01);
-        tabViewChildList.add(tabViewChild02);
-        tabViewChildList.add(tabViewChild05);
-        //end add data
-        tabView.setTabViewDefaultPosition(0);
-        tabView.setTabViewChild(tabViewChildList,getSupportFragmentManager());
     }
 
     @Override
@@ -127,7 +115,6 @@ public class MainActivity extends BaseActivity {
     }
 
 
-
     @Override
     protected void initView() {
         initToolbar();
@@ -139,7 +126,7 @@ public class MainActivity extends BaseActivity {
         mFragmentPagerAdapter = new FragmentPagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
-                switch (position){
+                switch (position) {
                     case 0:
                         return mPeerListFragment;
                 }
@@ -161,8 +148,19 @@ public class MainActivity extends BaseActivity {
                 return super.saveState();
             }
         };
-        //mVpContent.setAdapter(mFragmentPagerAdapter);
-
+        TabView tabView = (TabView) findViewById(R.id.tabView);
+        //start add data
+        mPeerListFragment = new PeerListFragment();
+        List<TabViewChild> tabViewChildList = new ArrayList<>();
+        TabViewChild tabViewChild01 = new TabViewChild(R.drawable.tab01_sel, R.drawable.tab01_unsel, "聊天", mPeerListFragment);
+        TabViewChild tabViewChild02 = new TabViewChild(R.drawable.tab02_sel, R.drawable.tab02_unsel, "群聊", FragmentCommon.newInstance("群聊"));
+        TabViewChild tabViewChild05 = new TabViewChild(R.drawable.tab05_sel, R.drawable.tab05_unsel, "我的", new PersonalDetailFragment());
+        tabViewChildList.add(tabViewChild01);
+        tabViewChildList.add(tabViewChild02);
+        tabViewChildList.add(tabViewChild05);
+        //end add data
+        tabView.setTabViewDefaultPosition(0);
+        tabView.setTabViewChild(tabViewChildList, getSupportFragmentManager());
     }
 
     private void initToolbar() {
@@ -177,19 +175,19 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu,menu);
+        getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_search:
-                if (mPeerListFragment.isServerSocketConnected()){
+                if (mPeerListFragment.isServerSocketConnected()) {
                     ScanDeviceFragment mScanDeviceFragment = new ScanDeviceFragment();
                     mScanDeviceFragment.setCancelable(false);
-                    mScanDeviceFragment.show(getSupportFragmentManager(),"scanDevice");
-                }else {
+                    mScanDeviceFragment.show(getSupportFragmentManager(), "scanDevice");
+                } else {
                     showToast("ServerSocket未连接，请检查WIFI！");
                 }
                 break;

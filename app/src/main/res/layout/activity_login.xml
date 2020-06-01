@@ -98,12 +98,12 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="400dp"
         android:orientation="vertical"
-        android:paddingLeft="170dp"
         >
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/civ_user_image_act_login"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:layout_gravity="center"
             android:src="@drawable/iv_0" />
     </LinearLayout>
 

@@ -14,6 +14,7 @@ public class PeerBean {
     private String recentMessage;
     private String time;
     private String userIp;
+    private int msgNum = 0; // 未读消息数量
 
     @Override
     public String toString() {
@@ -24,6 +25,14 @@ public class PeerBean {
                 ", time='" + time + '\'' +
                 ", userIp='" + userIp + '\'' +
                 '}';
+    }
+
+    public int getMsgNum() {
+        return msgNum;
+    }
+
+    public void setMsgNum(int msgNum) {
+        this.msgNum = msgNum;
     }
 
     public int getUserImageId() {

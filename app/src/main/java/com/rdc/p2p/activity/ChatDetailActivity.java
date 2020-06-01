@@ -43,7 +43,9 @@ import android.widget.TextView;
 
 import com.rdc.p2p.R;
 import com.rdc.p2p.adapter.MsgRvAdapter;
+import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseActivity;
+import com.rdc.p2p.bean.MyDnsBean;
 import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.config.FileState;
 import com.rdc.p2p.event.LinkSocketRequestEvent;
@@ -58,6 +60,7 @@ import com.rdc.p2p.manager.SocketManager;
 import com.rdc.p2p.presenter.ChatDetailPresenter;
 import com.rdc.p2p.util.AudioRecorderUtil;
 import com.rdc.p2p.util.MediaPlayerUtil;
+import com.rdc.p2p.util.MyDnsUtil;
 import com.rdc.p2p.util.ProgressTextUtil;
 import com.rdc.p2p.util.SDUtil;
 import com.rdc.p2p.widget.PlayerSoundView;
@@ -267,7 +270,8 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mRvMsgList.setLayoutManager(mLLManager);
         mRvMsgList.setAdapter(mMsgRvAdapter);
         mRvMsgList.getItemAnimator().setChangeDuration(0);
-        mMsgRvAdapter.appendData(DataSupport.where("belongIp = ?",mTargetPeerIp).find(MessageBean.class));
+        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ?", MyDnsUtil.convertUserIp(mTargetPeerIp), App.getUserBean().getNickName()).find(MessageBean.class);
+        mMsgRvAdapter.appendData(mRvMsgBeanList);
         mHandler.sendEmptyMessage(SCROLL_NOW);
         View view = View.inflate(this, R.layout.popupwindow_micorphone, null);
         mPwMicrophone = new PopupWindow(this);
@@ -377,7 +381,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
             @Override
             public void onClick(View view) {
                 if (!TextUtils.isEmpty(getString(mEtInput))) {
-                    MessageBean textMsg = new MessageBean(mTargetPeerIp);
+                    MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
                     textMsg.setMine(true);
                     textMsg.setMsgType(Protocol.TEXT);
                     textMsg.setText(getString(mEtInput));
@@ -460,7 +464,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
             @Override
             public void onStop(String audioPath) {
                 //录音结束，自动发送音频消息
-                MessageBean audioMsg = new MessageBean(mTargetPeerIp);
+                MessageBean audioMsg = MessageBean.getInstance(mTargetPeerIp);
                 audioMsg.setMine(true);
                 audioMsg.setMsgType(Protocol.AUDIO);
                 audioMsg.setAudioPath(audioPath);
@@ -529,7 +533,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
             case CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
                     String imagePath = SDUtil.getFilePathByUri(ChatDetailActivity.this,data.getData());
-                    MessageBean imageMsg = new MessageBean(mTargetPeerIp);
+                    MessageBean imageMsg = MessageBean.getInstance(mTargetPeerIp);
                     imageMsg.setMine(true);
                     imageMsg.setMsgType(Protocol.IMAGE);
                     imageMsg.setImagePath(imagePath);
@@ -542,7 +546,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 break;
             case TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    MessageBean imageMsg = new MessageBean(mTargetPeerIp);
+                    MessageBean imageMsg = MessageBean.getInstance(mTargetPeerIp);
                     imageMsg.setMine(true);
                     imageMsg.setMsgType(Protocol.IMAGE);
                     imageMsg.setImagePath(mTakePhotoFile.getAbsolutePath());
@@ -556,7 +560,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
             case FILE_MANAGER:
                 if (resultCode == RESULT_OK) {
                     isSendingFile = true;
-                    MessageBean fileMsg = new MessageBean(mTargetPeerIp);
+                    MessageBean fileMsg = MessageBean.getInstance(mTargetPeerIp);
                     fileMsg.setMine(true);
                     fileMsg.setMsgType(Protocol.FILE);
                     fileMsg.setUserIp(mTargetPeerIp);//这里得设置为对方ip，否则在本窗口下 void receiveMessage(MessageBean messageBean) 会丢弃此消息

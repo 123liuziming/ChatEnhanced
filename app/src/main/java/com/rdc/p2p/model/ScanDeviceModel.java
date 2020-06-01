@@ -32,6 +32,7 @@ public class ScanDeviceModel extends BaseModel implements ScanDeviceContract.Mod
                     mPresenter.scanDeviceError("扫描端口失败，请检查WIFI连接！");
                     return;
                 }
+                //Log.d("ip now is", ScanDeviceUtil.getInstance().getDevAddress());
                 App.setMyIP(ScanDeviceUtil.getInstance().getDevAddress());
                 Long startTime = System.currentTimeMillis();//开始扫描的时间
                 ScanDeviceUtil.getInstance().scan();//开始扫描
