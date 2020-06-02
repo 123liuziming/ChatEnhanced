@@ -41,11 +41,7 @@
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files>
-      <object connection-id="dd50885a-803e-4df0-824a-1b23ed855e62" object-ref="schemas/main/tables/mydnsbean" />
-      <object connection-id="cdd1eb90-e8f5-4eaa-98e3-a0e56dff856c" object-ref="schemas/main/tables/mydnsbean" />
-      <object connection-id="dd50885a-803e-4df0-824a-1b23ed855e62" object-ref="schemas/main/tables/messagebean" />
-    </open-files>
+    <open-files />
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="cdd1eb90-e8f5-4eaa-98e3-a0e56dff856c" />

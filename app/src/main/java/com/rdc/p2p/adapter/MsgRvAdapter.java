@@ -58,6 +58,12 @@ public class MsgRvAdapter extends BaseRecyclerViewAdapter<MessageBean> {
     }
 
     @Override
+    public void clearData() {
+        mFileNameList.clear();
+        super.clearData();
+    }
+
+    @Override
     public void appendData(MessageBean messageBean) {
         super.appendData(messageBean);
         if (messageBean.getMsgType() == Protocol.FILE) {

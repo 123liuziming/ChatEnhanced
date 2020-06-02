@@ -26,6 +26,11 @@ public abstract class BaseRecyclerViewAdapter<T> extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
+    public void clearData() {
+        mDataList.clear();
+        notifyDataSetChanged();
+    }
+
     //分页加载，追加数据
     public void appendData(List<T> dataList) {
         if (null != dataList && !dataList.isEmpty()) {

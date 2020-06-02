@@ -75,6 +75,11 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
         }
     });
 
+
+    public PeerListRvAdapter getmPeerListRvAdapter() {
+        return mPeerListRvAdapter;
+    }
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
 
@@ -171,9 +176,11 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
                     showToast("正在建立Socket连接！");
                     mPresenter.linkPeer(peerBean.getUserIp());
                 }else {
-                    ChatDetailActivity.actionStart(mBaseActivity,peerBean.getUserIp(),peerBean.getNickName(),peerBean.getUserImageId());
+                    ChatDetailActivity.actionStart(mBaseActivity,peerBean.getUserIp(),peerBean.getNickName(),peerBean.getUserImageId(), position);
                 }
             }
+
+
 
             @Override
             public boolean onItemLongClick(int position) {

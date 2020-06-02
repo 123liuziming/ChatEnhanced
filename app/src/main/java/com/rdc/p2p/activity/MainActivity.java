@@ -2,6 +2,7 @@ package com.rdc.p2p.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
@@ -26,6 +27,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rdc.p2p.R;
 import com.rdc.p2p.base.BaseActivity;
@@ -196,6 +198,16 @@ public class MainActivity extends BaseActivity {
 //                break;
         }
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case 1:
+                if(resultCode == RESULT_OK) {
+                    mPeerListFragment.getmPeerListRvAdapter().updateItemText("", data.getStringExtra("ip"));
+                }
+        }
     }
 
     @Override
