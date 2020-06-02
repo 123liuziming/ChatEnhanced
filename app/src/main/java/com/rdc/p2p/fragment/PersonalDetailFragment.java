@@ -1,6 +1,7 @@
 package com.rdc.p2p.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,24 +13,28 @@ import android.widget.TextView;
 
 
 import com.rdc.p2p.R;
+import com.rdc.p2p.activity.LoginActivity;
+import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseFragment;
 import com.rdc.p2p.base.BasePresenter;
+import com.rdc.p2p.bean.MyDnsBean;
+import com.rdc.p2p.util.MyDnsUtil;
+
+import org.litepal.crud.DataSupport;
 
 import butterknife.BindView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PersonalDetailFragment extends BaseFragment {
     private static final String TAG ="PersonDetailFragment";
-    @BindView(R.id.user_image_detail)
-    CircleImageView mCivUserImage;
     @BindView(R.id.name_data)
-    TextView textName;
-    @BindView(R.id.password_data)
-    EditText textPassWord;
-    @BindView(R.id.btn_commit)
-    Button btn_commit;
+    TextView nameData;
+
     @BindView(R.id.btn_return)
     Button btn_return;
+
+    @BindView(R.id.ip_data)
+    TextView ipData;
 
     @Override
     protected int setLayoutResourceId() {
@@ -53,13 +58,26 @@ public class PersonalDetailFragment extends BaseFragment {
 
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void initView() {
+        nameData.setText("用户名: " + App.getUserBean().getNickName());
+        ipData.setText("本次登录IP: " + App.getMyIP());
     }
 
     @Override
     protected void setListener() {
-
+        btn_return.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DataSupport.deleteAll(MyDnsBean.class);
+                Intent intent_login = new Intent();
+                intent_login.setClass(mBaseActivity, LoginActivity.class);
+                intent_login.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //关键的一句，将新的activity置为栈顶
+                startActivity(intent_login);
+                mBaseActivity.finish();
+            }
+        });
     }
 
 }

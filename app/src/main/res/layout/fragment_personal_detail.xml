@@ -4,12 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_text_or_bg">
-
+    android:background="@color/little_gray">
     <include
         android:id="@+id/toolbar"
-        layout="@layout/layout_persontoolbar"
-        android:layout_width="0dp"
+        layout="@layout/layout_toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,16 +26,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
+
     <android.support.design.widget.TextInputLayout
         android:id="@+id/user_name_detail"
         android:layout_width="0dp"
-        android:layout_height="75dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
         android:gravity="bottom"
         android:theme="@style/TextInputLayoutTheme"
-        app:layout_constraintBottom_toTopOf="@id/user_password_detail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/user_image_detail">
@@ -46,9 +45,9 @@
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:background="@drawable/bg_account_input"
-            android:gravity="center_vertical|start"
+            android:gravity="center_vertical"
             android:hint="显示姓名"
-            android:maxLength="15"
+            android:maxLength="40"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:singleLine="true"
@@ -56,83 +55,44 @@
             android:textSize="@dimen/text_size_normal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/civ_user_image_act_login"
+            app:layout_constraintTop_toBottomOf="@+id/name_data"
             tools:ignore="TextFields" />
 
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/user_password_detail"
-        android:layout_width="0dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginEnd="20dp"
-        android:gravity="bottom"
-        android:theme="@style/TextInputLayoutTheme"
-        app:layout_constraintBottom_toTopOf="@id/btn_commit"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name_detail">
-
-        <EditText
-            android:id="@+id/password_data"
+        <TextView
+            android:id="@+id/ip_data"
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:background="@drawable/bg_account_input"
-            android:gravity="center_vertical|start"
-            android:hint="密码"
-            android:inputType="text"
-            android:maxLength="15"
+            android:gravity="center_vertical"
+            android:maxLength="40"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:singleLine="true"
+            android:layout_marginTop="10dp"
             android:textColor="@color/black"
             android:textSize="@dimen/text_size_normal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_name_detail"
+            app:layout_constraintTop_toBottomOf="@+id/name_data"
             tools:ignore="TextFields" />
+
+            <Button
+                android:id="@+id/btn_return"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/name_data"
+                android:layout_gravity="center"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/bg_state_login"
+                android:text="退出"
+                android:textColor="@color/color_Accent"
+                android:textSize="@dimen/text_size_normal"
+                tools:ignore="MissingConstraints" />
 
 
     </android.support.design.widget.TextInputLayout>
 
-    <Button
-        android:id="@+id/btn_commit"
-
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/bg_state_login"
-        android:text="提交修改"
-        android:textColor="@color/colorPrimary"
-        android:textSize="@dimen/text_size_normal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_password_detail" />
-    <Button
-        android:id="@+id/btn_return"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/bg_state_login"
-        android:text="返回"
-        android:textColor="@color/colorPrimary"
-        android:textSize="@dimen/text_size_normal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_commit" />
-
-    <android.support.constraint.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp" />
 
 </android.support.constraint.ConstraintLayout>

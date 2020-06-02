@@ -50,4 +50,8 @@ public class MyDnsUtil {
         return solve(userIp, 2);
     }
 
+    public static void refresh(String mTargetIp) {
+        nameToIp.remove(mTargetIp);
+    }
+
 }

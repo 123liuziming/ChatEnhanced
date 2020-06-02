@@ -270,7 +270,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mRvMsgList.setLayoutManager(mLLManager);
         mRvMsgList.setAdapter(mMsgRvAdapter);
         mRvMsgList.getItemAnimator().setChangeDuration(0);
-        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ?", MyDnsUtil.convertUserIp(mTargetPeerIp), App.getUserBean().getNickName()).find(MessageBean.class);
+        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ?", mTargetPeerName, App.getUserBean().getNickName()).find(MessageBean.class);
         mMsgRvAdapter.appendData(mRvMsgBeanList);
         mHandler.sendEmptyMessage(SCROLL_NOW);
         View view = View.inflate(this, R.layout.popupwindow_micorphone, null);

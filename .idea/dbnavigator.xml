@@ -24,25 +24,46 @@
     <autoscroll-from-editor value="true" />
     <show-object-properties value="true" />
     <loaded-nodes>
-      <connection connection-id="5f062cfd-4fda-48ca-b21b-338ee660d0a7">
+      <connection connection-id="cdd1eb90-e8f5-4eaa-98e3-a0e56dff856c">
+        <schema name="main" object-types="view, table, dataset trigger, index, constraint, column" />
+      </connection>
+      <connection connection-id="dd50885a-803e-4df0-824a-1b23ed855e62">
         <schema name="main" object-types="view, table, dataset trigger, index, constraint, column" />
       </connection>
     </loaded-nodes>
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
-    <connection id="5f062cfd-4fda-48ca-b21b-338ee660d0a7">
+    <connection id="cdd1eb90-e8f5-4eaa-98e3-a0e56dff856c">
       <console name="Connection" type="STANDARD" schema="main" session="Main" />
+    </connection>
+    <connection id="dd50885a-803e-4df0-824a-1b23ed855e62">
+      <console name="Connection 1" type="STANDARD" schema="main" session="Main" />
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
-    <open-files />
+    <open-files>
+      <object connection-id="dd50885a-803e-4df0-824a-1b23ed855e62" object-ref="schemas/main/tables/mydnsbean" />
+      <object connection-id="cdd1eb90-e8f5-4eaa-98e3-a0e56dff856c" object-ref="schemas/main/tables/mydnsbean" />
+      <object connection-id="dd50885a-803e-4df0-824a-1b23ed855e62" object-ref="schemas/main/tables/messagebean" />
+    </open-files>
   </component>
   <component name="DBNavigator.Project.DatabaseSessionManager">
-    <connection id="5f062cfd-4fda-48ca-b21b-338ee660d0a7" />
+    <connection id="cdd1eb90-e8f5-4eaa-98e3-a0e56dff856c" />
+    <connection id="dd50885a-803e-4df0-824a-1b23ed855e62" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
-    <filter-actions connection-id="5f062cfd-4fda-48ca-b21b-338ee660d0a7" dataset="main.messagebean" active-filter-id="9ff54ec9-3377-41d7-832b-e767019154c1">
-      <filter id="9ff54ec9-3377-41d7-832b-e767019154c1" name="Filter 1" temporary="false" custom-name="false" type="basic" join-type="AND">
+    <filter-actions connection-id="cdd1eb90-e8f5-4eaa-98e3-a0e56dff856c" dataset="main.mydnsbean" active-filter-id="0e258860-73d5-4905-8dfe-1e94d34cc819">
+      <filter id="0e258860-73d5-4905-8dfe-1e94d34cc819" name="Filter 1" temporary="false" custom-name="false" type="basic" join-type="AND">
+        <condition column="id" operator="is not null" value="" active="true" />
+      </filter>
+    </filter-actions>
+    <filter-actions connection-id="dd50885a-803e-4df0-824a-1b23ed855e62" dataset="main.mydnsbean" active-filter-id="408def27-01a3-4910-949c-93334570d167">
+      <filter id="408def27-01a3-4910-949c-93334570d167" name="Filter 1" temporary="false" custom-name="false" type="basic" join-type="AND">
+        <condition column="id" operator="is not null" value="" active="true" />
+      </filter>
+    </filter-actions>
+    <filter-actions connection-id="dd50885a-803e-4df0-824a-1b23ed855e62" dataset="main.messagebean" active-filter-id="9c006761-cc0e-4817-b0ad-cf431eee7c81">
+      <filter id="9c006761-cc0e-4817-b0ad-cf431eee7c81" name="Filter 1" temporary="false" custom-name="false" type="basic" join-type="AND">
         <condition column="id" operator="is not null" value="" active="true" />
       </filter>
     </filter-actions>
@@ -70,9 +91,95 @@
   </component>
   <component name="DBNavigator.Project.Settings">
     <connections>
-      <connection id="5f062cfd-4fda-48ca-b21b-338ee660d0a7" active="true">
+      <connection id="cdd1eb90-e8f5-4eaa-98e3-a0e56dff856c" active="true">
         <database>
           <name value="Connection" />
+          <description value="" />
+          <database-type value="SQLITE" />
+          <config-type value="BASIC" />
+          <database-version value="3.21" />
+          <driver-source value="BUILTIN" />
+          <driver-library value="" />
+          <driver value="" />
+          <url-type value="FILE" />
+          <host value="localhost" />
+          <port value="1234" />
+          <database value="database" />
+          <files>
+            <file path="$PROJECT_DIR$/../Message.db" schema="main" />
+          </files>
+          <type value="NONE" />
+          <user value="" />
+          <deprecated-pwd value="" />
+        </database>
+        <properties>
+          <auto-commit value="false" />
+        </properties>
+        <ssh-settings>
+          <active value="false" />
+          <proxy-host value="" />
+          <proxy-port value="22" />
+          <proxy-user value="" />
+          <deprecated-proxy-pwd value="" />
+          <auth-type value="PASSWORD" />
+          <key-file value="" />
+          <key-passphrase value="" />
+        </ssh-settings>
+        <ssl-settings>
+          <active value="false" />
+          <certificate-authority-file value="" />
+          <client-certificate-file value="" />
+          <client-key-file value="" />
+        </ssl-settings>
+        <details>
+          <charset value="UTF-8" />
+          <session-management value="true" />
+          <ddl-file-binding value="true" />
+          <database-logging value="false" />
+          <connect-automatically value="true" />
+          <restore-workspace value="true" />
+          <restore-workspace-deep value="true" />
+          <environment-type value="default" />
+          <idle-time-to-disconnect value="30" />
+          <idle-time-to-disconnect-pool value="5" />
+          <credential-expiry-time value="10" />
+          <max-connection-pool-size value="7" />
+          <alternative-statement-delimiter value="" />
+        </details>
+        <object-filters hide-empty-schemas="false" hide-pseudo-columns="false">
+          <object-type-filter use-master-settings="true">
+            <object-type name="SCHEMA" enabled="true" />
+            <object-type name="USER" enabled="true" />
+            <object-type name="ROLE" enabled="true" />
+            <object-type name="PRIVILEGE" enabled="true" />
+            <object-type name="CHARSET" enabled="true" />
+            <object-type name="TABLE" enabled="true" />
+            <object-type name="VIEW" enabled="true" />
+            <object-type name="MATERIALIZED_VIEW" enabled="true" />
+            <object-type name="NESTED_TABLE" enabled="true" />
+            <object-type name="COLUMN" enabled="true" />
+            <object-type name="INDEX" enabled="true" />
+            <object-type name="CONSTRAINT" enabled="true" />
+            <object-type name="DATASET_TRIGGER" enabled="true" />
+            <object-type name="DATABASE_TRIGGER" enabled="true" />
+            <object-type name="SYNONYM" enabled="true" />
+            <object-type name="SEQUENCE" enabled="true" />
+            <object-type name="PROCEDURE" enabled="true" />
+            <object-type name="FUNCTION" enabled="true" />
+            <object-type name="PACKAGE" enabled="true" />
+            <object-type name="TYPE" enabled="true" />
+            <object-type name="TYPE_ATTRIBUTE" enabled="true" />
+            <object-type name="ARGUMENT" enabled="true" />
+            <object-type name="DIMENSION" enabled="true" />
+            <object-type name="CLUSTER" enabled="true" />
+            <object-type name="DBLINK" enabled="true" />
+          </object-type-filter>
+          <object-name-filters />
+        </object-filters>
+      </connection>
+      <connection id="dd50885a-803e-4df0-824a-1b23ed855e62" active="true">
+        <database>
+          <name value="Connection 1" />
           <description value="" />
           <database-type value="SQLITE" />
           <config-type value="BASIC" />
