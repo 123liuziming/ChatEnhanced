@@ -12,12 +12,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 
+import com.bumptech.glide.Glide;
 import com.rdc.p2p.R;
 import com.rdc.p2p.activity.LoginActivity;
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseFragment;
 import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.bean.MyDnsBean;
+import com.rdc.p2p.util.ImageUtil;
 import com.rdc.p2p.util.MyDnsUtil;
 
 import org.litepal.crud.DataSupport;
@@ -27,6 +29,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PersonalDetailFragment extends BaseFragment {
     private static final String TAG ="PersonDetailFragment";
+
+    @BindView(R.id.user_image_detail)
+    CircleImageView mCivUserImage;
+
     @BindView(R.id.name_data)
     TextView nameData;
 
@@ -63,6 +69,7 @@ public class PersonalDetailFragment extends BaseFragment {
     protected void initView() {
         nameData.setText("用户名: " + App.getUserBean().getNickName());
         ipData.setText("本次登录IP: " + App.getMyIP());
+        Glide.with(this).load(ImageUtil.getImageResId(App.getUserBean().getUserImageId())).into(mCivUserImage);
     }
 
     @Override

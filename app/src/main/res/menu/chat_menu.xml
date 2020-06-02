@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/delete_chat"
-        android:title="删除聊天记录" />
+        android:icon="@drawable/delete_chat"
+        android:title="删除聊天记录"
+        app:showAsAction="never" />
     <item
         android:id="@+id/get_chat"
+        android:icon="@drawable/get_chat"
+        app:showAsAction="never"
         android:title="拉取历史记录" />
 </menu>

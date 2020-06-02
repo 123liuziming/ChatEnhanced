@@ -75,6 +75,7 @@ import org.litepal.crud.DataSupport;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -199,8 +200,6 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     }
 
 
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -224,10 +223,26 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
             intent.putExtra("ip", mTargetPeerIp);
             setResult(RESULT_OK, intent);
             finish();
-        }
-        else
+        } else
             super.onBackPressed();
     }
+
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        if (menu != null) {
+            if (menu.getClass().getSimpleName().equalsIgnoreCase("MenuBuilder")) {
+                try {
+                    Method method = menu.getClass().getDeclaredMethod("setOptionalIconsVisible", Boolean.TYPE);
+                    method.setAccessible(true);
+                    method.invoke(menu, true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return super.onMenuOpened(featureId, menu);
+    }
+
 
 
     @Override
