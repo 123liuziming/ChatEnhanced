@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -43,6 +44,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.apollographql.apollo.ApolloCall;
+import com.apollographql.apollo.ApolloClient;
+import com.apollographql.apollo.api.Response;
+import com.apollographql.apollo.exception.ApolloException;
+import com.example.MessagesBetweenQuery;
 import com.rdc.p2p.R;
 import com.rdc.p2p.adapter.MsgRvAdapter;
 import com.rdc.p2p.adapter.PeerListRvAdapter;
@@ -69,8 +75,10 @@ import com.rdc.p2p.util.SDUtil;
 import com.rdc.p2p.widget.PlayerSoundView;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Logger;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.jetbrains.annotations.NotNull;
 import org.litepal.crud.DataSupport;
 
 import java.io.File;
@@ -212,7 +220,33 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 onBackPressed(true);
                 showToast("已删除");
             case R.id.get_chat:
+                ApolloClient apolloClient = ApolloClient.builder().serverUrl("http://49.232.12.147:4000").build();
+                //apolloClient.query(MessagesBetweenQuery.MessagesBetween);
+                final MessagesBetweenQuery messagesBetween = MessagesBetweenQuery.builder()
+                        .participantA(App.getUserBean().getNickName())
+                        .participantB(mTargetPeerName)
+                        .build();
+
+                Log.d(TAG, "用户A：" + App.getUserBean().getNickName());
+                Log.d(TAG, "用户B：" + mTargetPeerName);
+
+                apolloClient.query(messagesBetween)
+                        .enqueue(new ApolloCall.Callback<MessagesBetweenQuery.Data>() {
+                            @Override
+                            public void onResponse(@NotNull Response<MessagesBetweenQuery.Data> response) {
+                                Log.d(TAG, response.getData().toString());
+                            }
+
+                            @Override
+                            public void onFailure(@NotNull ApolloException e) {
+                                Log.d(TAG, e.getLocalizedMessage(), e);
+                            }
+                        });
+
+
                 break;
+            //Response(operation=com.example.MessagesBetweenQuery@38b6340, data=Data{MessagesBetween=null}, errors=null, dependentKeys=[], fromCache=false, extensions={}, executionContext=com.apollographql.apollo.http.OkHttpExecutionContext@fb6c404)
+            //D/EGL_emulation: eglMakeCurrent: 0xf5c82540: ver 3 0 (tinfo 0xf5ff8f90)
         }
         return true;
     }
@@ -242,7 +276,6 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         }
         return super.onMenuOpened(featureId, menu);
     }
-
 
 
     @Override
