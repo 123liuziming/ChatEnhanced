@@ -1,0 +1,9 @@
+query MessagesBetween($participantA:String!, $participantB:String!) {
+  MessagesBetween(participantA: $participantA, participantB: $participantB) {
+  	content
+    sender
+    receiver
+    time
+    type
+  }
+}
