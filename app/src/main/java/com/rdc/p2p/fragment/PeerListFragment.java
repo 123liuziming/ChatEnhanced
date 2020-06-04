@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.rdc.p2p.R;
 import com.rdc.p2p.activity.ChatDetailActivity;
 import com.rdc.p2p.adapter.PeerListRvAdapter;
+import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseFragment;
 import com.rdc.p2p.config.FileState;
 import com.rdc.p2p.event.LinkSocketRequestEvent;
@@ -142,7 +143,7 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void updateRecentMsg(RecentMsgEvent recentMsgEvent){
        mPeerListRvAdapter.updateItemText(recentMsgEvent.getText(),recentMsgEvent.getTargetIp());
-       mPeerListRvAdapter.addItemBadge(recentMsgEvent.getTargetIp());
+       // mPeerListRvAdapter.addItemBadge(recentMsgEvent.getTargetIp());
     }
 
     public boolean isServerSocketConnected(){

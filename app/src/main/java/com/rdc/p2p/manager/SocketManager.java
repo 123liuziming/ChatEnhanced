@@ -65,7 +65,9 @@ public class SocketManager {
         return mSocketManager;
     }
 
-
+    public Collection<SocketThread> getSocketThreads() {
+        return mSocketThreads.values();
+    }
 
     /**
      * 根据ip获取SocketThread

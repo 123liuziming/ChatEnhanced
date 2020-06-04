@@ -48,6 +48,8 @@ public class MessageBean extends DataSupport implements Cloneable {
         return new MessageBean(belongIp, belongName);
     }
 
+
+
     @Override
     public MessageBean clone() {
         MessageBean messageBean = null;

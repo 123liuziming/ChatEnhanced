@@ -219,6 +219,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 mMsgRvAdapter.clearData();
                 onBackPressed(true);
                 showToast("已删除");
+                break;
             case R.id.get_chat:
                 ApolloClient apolloClient = ApolloClient.builder().serverUrl("http://49.232.12.147:4000").build();
                 //apolloClient.query(MessagesBetweenQuery.MessagesBetween);

@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:layout_gravity="center"
     android:theme="@style/Theme.AppCompat.NoActionBar"
     android:focusableInTouchMode="true"
     >
@@ -23,6 +24,13 @@
             android:layout_height="wrap_content">
 
         </LinearLayout>
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/civ_user_image_act_login"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:src="@drawable/iv_0" />
 
     </FrameLayout>
 
@@ -94,17 +102,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="400dp"
-        android:orientation="vertical"
+        android:gravity="center"
         >
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/civ_user_image_act_login"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:src="@drawable/iv_0" />
+
     </LinearLayout>
 
     <LinearLayout

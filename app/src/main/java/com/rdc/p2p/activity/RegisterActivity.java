@@ -61,8 +61,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
-
-
     class check {
 
         /**

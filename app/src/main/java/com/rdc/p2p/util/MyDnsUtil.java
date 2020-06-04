@@ -51,7 +51,11 @@ public class MyDnsUtil {
     }
 
     public static void refresh(String mTargetIp) {
-        nameToIp.remove(mTargetIp);
+        ipToName.remove(mTargetIp);
+    }
+
+    public static void refreshAll() {
+        ipToName.clear();
     }
 
 }
