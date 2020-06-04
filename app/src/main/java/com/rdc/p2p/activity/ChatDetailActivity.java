@@ -211,6 +211,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 mMsgRvAdapter.clearData();
                 onBackPressed(true);
                 showToast("已删除");
+                break;
             case R.id.get_chat:
                 break;
         }

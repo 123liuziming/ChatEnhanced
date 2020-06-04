@@ -19,10 +19,19 @@ import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseFragment;
 import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.bean.MyDnsBean;
+import com.rdc.p2p.config.Protocol;
+import com.rdc.p2p.manager.SocketManager;
+import com.rdc.p2p.thread.SocketThread;
 import com.rdc.p2p.util.ImageUtil;
 import com.rdc.p2p.util.MyDnsUtil;
 
 import org.litepal.crud.DataSupport;
+
+import java.net.Socket;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 import butterknife.BindView;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -78,6 +87,22 @@ public class PersonalDetailFragment extends BaseFragment {
             @Override
             public void onClick(View view) {
                 DataSupport.deleteAll(MyDnsBean.class);
+                MyDnsUtil.refreshAll();
+                Collection<SocketThread> allSocketThreads = SocketManager.getInstance().getSocketThreads();
+                for(final SocketThread s : allSocketThreads) {
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            s.sendRequest(App.getUserBean(), Protocol.DISCONNECT);
+                        }
+                    });
+                    thread.start();
+                    try {
+                        thread.join();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
                 Intent intent_login = new Intent();
                 intent_login.setClass(mBaseActivity, LoginActivity.class);
                 intent_login.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //关键的一句，将新的activity置为栈顶
