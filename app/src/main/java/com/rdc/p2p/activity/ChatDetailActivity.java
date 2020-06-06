@@ -240,7 +240,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
 
                             @Override
                             public void onFailure(@NotNull ApolloException e) {
-                                Log.d(TAG, e.getLocalizedMessage(), e);
+                                Log.e(TAG, e.getLocalizedMessage(), e);
                             }
                         });
 
