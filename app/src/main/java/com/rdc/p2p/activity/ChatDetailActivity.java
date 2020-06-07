@@ -236,11 +236,32 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                             @Override
                             public void onResponse(@NotNull Response<MessagesBetweenQuery.Data> response) {
                                 Log.d(TAG, response.getData().toString());
+                                try {
+                                    for (MessagesBetweenQuery.MessagesBetween message : response.getData().MessagesBetween()) {
+                                        MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
+                                        textMsg.setMine(message.sender() == App.getUserBean().getNickName()); // send by me
+                                        textMsg.setMsgType(message.type()); // Protocol.TEXT
+                                        textMsg.setText(message.content()); // getString(mEtInput)
+                                        textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
+                                        mMsgRvAdapter.appendData(textMsg);
+                                        mHandler.sendEmptyMessage(SCROLL_NOW);
+                                        presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
+                                        // EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp));
+                                    }
+                                } catch (NullPointerException e) {
+                                    Log.e(TAG, e.getLocalizedMessage(), e);
+                                    Looper.prepare();
+                                    showToast("拉取失败！");
+                                    Looper.loop();
+                                }
                             }
 
                             @Override
                             public void onFailure(@NotNull ApolloException e) {
                                 Log.e(TAG, e.getLocalizedMessage(), e);
+                                Looper.prepare();
+                                showToast("拉取失败！");
+                                Looper.loop();
                             }
                         });
 
