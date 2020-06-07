@@ -33,7 +33,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText email;
     private EditText passwordFirst; // 第一遍密码
     private EditText passwordFirstagain; // 重复密码
-    private Boolean canClickEmail = false;  //Email是否合法
+    private Boolean canClickEmail = true;  //Email是否合法
     private Boolean canClickPassWordSameSame = false;  //密码是否一致
     private Boolean canClickPassWordValid = false;  //密码是否是八到二十位字母和数字的组合
 
@@ -63,8 +63,9 @@ public class RegisterActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                        startActivity(intent);
+                        RegisterActivity.this.onBackPressed();
+                        // Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                        // startActivity(intent);
                     }
                 }
         );
@@ -128,9 +129,7 @@ public class RegisterActivity extends AppCompatActivity {
             String email = RegisterActivity.this.email.getText().toString();
             String password1 = RegisterActivity.this.passwordFirst.getText().toString();
             String password2 = RegisterActivity.this.passwordFirstagain.getText().toString();
-            if (!isEmail(email)) {
-                RegisterActivity.this.canClickEmail = false;
-            } else if (!same(password1, password2) || password1.isEmpty() || password2.isEmpty()) {
+            if (!same(password1, password2) || password1.isEmpty() || password2.isEmpty()) {
                 RegisterActivity.this.canClickEmail = true;
                 RegisterActivity.this.canClickPassWordSameSame = false;
             } else {
