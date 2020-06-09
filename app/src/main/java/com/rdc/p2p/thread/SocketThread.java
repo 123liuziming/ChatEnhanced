@@ -8,6 +8,8 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.rdc.p2p.Strategy.LatestMessageStrategy;
+import com.rdc.p2p.Strategy.MessageContext;
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseMsgState;
 import com.rdc.p2p.bean.MessageBean;
@@ -382,17 +384,11 @@ public class SocketThread extends Thread {
     }
 
     private void setLatestMsg(List<MessageBean> allMsg, PeerBean peerInfo) {
-        if (allMsg.size() != 0) {
-            MessageBean tmp = Collections.max(allMsg, new Comparator<MessageBean>() {
-                @Override
-                public int compare(MessageBean messageBean, MessageBean t1) {
-                    return messageBean.getDate().compareTo(t1.getDate());
-                }
-            });
-            peerInfo.setRecentMessage(tmp.getText());
-        }
+        LatestMessageStrategy strategy = new LatestMessageStrategy();
+        MessageContext context = new MessageContext(strategy);
+        MessageBean latestMsg =  context.executeStrategy(allMsg);
+        peerInfo.setRecentMessage(latestMsg.getText());
         mPresenter.addPeer(peerInfo);
-
     }
 
 }
