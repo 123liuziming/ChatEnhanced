@@ -20,19 +20,22 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.rdc.p2p.R;
+import com.rdc.p2p.activity.AddGroupActivity;
 import com.rdc.p2p.activity.ChatDetailActivity;
-import com.rdc.p2p.adapter.PeerListRvAdapter;
+import com.rdc.p2p.adapter.GroupListRvAdapter;
 import com.rdc.p2p.base.BaseFragment;
+import com.rdc.p2p.bean.GroupBean;
 import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.config.FileState;
-import com.rdc.p2p.contract.PeerListContract;
+import com.rdc.p2p.contract.GroupListContract;
+import com.rdc.p2p.event.LinkGroupSocketResponseEvent;
 import com.rdc.p2p.event.LinkSocketRequestEvent;
 import com.rdc.p2p.event.LinkSocketResponseEvent;
 import com.rdc.p2p.event.RecentMsgEvent;
 import com.rdc.p2p.listener.OnClickRecyclerViewListener;
 import com.rdc.p2p.manager.SocketManager;
-import com.rdc.p2p.presenter.PeerListPresenter;
+import com.rdc.p2p.presenter.GroupListPresenter;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -44,7 +47,7 @@ import java.util.Objects;
 
 import butterknife.BindView;
 
-public class GroupChatFragment extends BaseFragment<PeerListPresenter> implements PeerListContract.View {
+public class GroupListFragment extends BaseFragment<GroupListPresenter> implements GroupListContract.View {
     private static final String TAG = "GroupChatFragment";
     private static final int INIT_SERVER_SOCKET = 0;
 
@@ -55,9 +58,9 @@ public class GroupChatFragment extends BaseFragment<PeerListPresenter> implement
     @BindView(R.id.tv_tip_nonePeer_fragment_peer_list)
     TextView mTvTipNonePeer;
 
-    private PeerListRvAdapter mPeerListRvAdapter;
+    private GroupListRvAdapter mGroupListRvAdapter;
     private WifiReceiver mWifiReceiver;
-    private List<String> mPeerList;
+    private List<String> mGroupList;
     private boolean isFirstScanDeviceFinished;
     private Handler mHandler =new Handler(new Handler.Callback() {
         @Override
@@ -79,8 +82,8 @@ public class GroupChatFragment extends BaseFragment<PeerListPresenter> implement
         return R.layout.fragment_group_chat;
     }
     @Override
-    protected PeerListPresenter getInstance() {
-        return new PeerListPresenter(mBaseActivity);
+    protected GroupListPresenter getInstance() {
+        return new GroupListPresenter(mBaseActivity);
     }
 
     @Override
@@ -92,9 +95,6 @@ public class GroupChatFragment extends BaseFragment<PeerListPresenter> implement
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         mBaseActivity.registerReceiver(mWifiReceiver, filter);
-        mRvPeerList.setVisibility(View.VISIBLE);
-        mLlLoadingPeersInfo.setVisibility(View.GONE);
-        mTvTipNonePeer.setVisibility(View.GONE);
     }
 
     @Override
@@ -113,29 +113,24 @@ public class GroupChatFragment extends BaseFragment<PeerListPresenter> implement
 
     @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
     public void scanDeviceFinished(List<String> ipList){
-        mPeerList.clear();
-        mPeerList.addAll(ipList);
+        mGroupList.clear();
+        mGroupList.addAll(ipList);
         if (isFirstScanDeviceFinished){
             //第一次扫描成功
             isFirstScanDeviceFinished = false;
         }else {
             if (mPresenter.isServerSocketConnected()){
-                mPresenter.linkPeers(new ArrayList<>(mPeerList));
-                mPeerList.clear();
+                mPresenter.linkGroups(new ArrayList<>(mGroupList));
+                mGroupList.clear();
             }
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void linkSocket(LinkSocketRequestEvent linkSocketRequestEvent){
-        mPresenter.linkPeer(linkSocketRequestEvent.getTargetIp());
+        mPresenter.linkGroup(linkSocketRequestEvent.getTargetIp());
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void updateRecentMsg(RecentMsgEvent recentMsgEvent){
-        mPeerListRvAdapter.updateItemText(recentMsgEvent.getText(),recentMsgEvent.getTargetIp());
-        // mPeerListRvAdapter.addItemBadge(recentMsgEvent.getTargetIp());
-    }
 
     public boolean isServerSocketConnected(){
         return mPresenter.isServerSocketConnected();
@@ -145,33 +140,36 @@ public class GroupChatFragment extends BaseFragment<PeerListPresenter> implement
     @Override
     protected void initData(Bundle bundle) {
         isFirstScanDeviceFinished = true;
-        mPeerList = new ArrayList<>();
+        mGroupList = new ArrayList<>();
     }
 
 
     @Override
     protected void initView() {
-        mPeerListRvAdapter = new PeerListRvAdapter();
+        mGroupListRvAdapter = new GroupListRvAdapter();
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mBaseActivity,DividerItemDecoration.VERTICAL);
         dividerItemDecoration.setDrawable(Objects.requireNonNull(ContextCompat.getDrawable(mBaseActivity, R.drawable.bg_divider)));
         mRvPeerList.addItemDecoration(dividerItemDecoration);
         mRvPeerList.setLayoutManager(new LinearLayoutManager(mBaseActivity,LinearLayoutManager.VERTICAL,false));
-        mRvPeerList.setAdapter(mPeerListRvAdapter);
+        mRvPeerList.setAdapter(mGroupListRvAdapter);
     }
 
     @Override
     protected void setListener() {
-        mPeerListRvAdapter.setOnRecyclerViewListener(new OnClickRecyclerViewListener() {
+        mGroupListRvAdapter.setOnRecyclerViewListener(new OnClickRecyclerViewListener() {
             @Override
             public void onItemClick(int position) {
-                PeerBean peerBean = mPeerListRvAdapter.getDataList().get(position);
-                mPeerListRvAdapter.clearItemBadge(position);
-                if (SocketManager.getInstance().isClosedSocket(peerBean.getUserIp())){
-                    showToast("正在建立Socket连接！");
-                    mPresenter.linkPeer(peerBean.getUserIp());
-                }else {
-                    ChatDetailActivity.actionStart(mBaseActivity,peerBean.getUserIp(),peerBean.getNickName(),peerBean.getUserImageId(), position);
-                }
+                Intent intent = new Intent();
+                intent.setClass(getContext(), AddGroupActivity.class);
+                startActivityForResult(intent,0);
+//                GroupBean groupBean = mGroupListRvAdapter.getDataList().get(position);
+//                mGroupListRvAdapter.clearItemBadge(position);
+//                if (SocketManager.getInstance().isClosedSocket(groupBean.getUserIp())){
+//                    showToast("正在建立Socket连接！");
+//                    mPresenter.linkGroup(groupBean.getUserIp());
+//                }else {
+//                    ChatDetailActivity.actionStart(mBaseActivity,groupBean.getUserIp(),groupBean.getNickName(),groupBean.getGroupImageId(), position);
+//                }
             }
 
 
@@ -185,7 +183,7 @@ public class GroupChatFragment extends BaseFragment<PeerListPresenter> implement
     }
 
     @Override
-    public void updatePeerList(List<PeerBean> list) {
+    public void updateGroupList(List<GroupBean> list) {
         if (list.size() == 0){
             mRvPeerList.setVisibility(View.GONE);
             mLlLoadingPeersInfo.setVisibility(View.GONE);
@@ -194,52 +192,24 @@ public class GroupChatFragment extends BaseFragment<PeerListPresenter> implement
             mRvPeerList.setVisibility(View.VISIBLE);
             mLlLoadingPeersInfo.setVisibility(View.GONE);
             mTvTipNonePeer.setVisibility(View.GONE);
-            mPeerListRvAdapter.updateData(list);
+            mGroupListRvAdapter.updateData(list);
         }
     }
 
     @Override
     public void messageReceived(MessageBean messageBean) {
-        PeerBean peer = mPeerListRvAdapter.updateItemText(messageBean.getText(),messageBean.getUserIp());
-        peer = mPeerListRvAdapter.addItemBadge(messageBean.getUserIp());
-        if (peer == null){
-            showToast("收到成员列表以外的消息！");
-        }else {
-            EventBus.getDefault().post(messageBean);
-        }
     }
 
     @Override
     public void fileReceiving(MessageBean messageBean) {
-        if (messageBean.getFileState() == FileState.RECEIVE_FILE_START){
-            mPeerListRvAdapter.updateItemText(messageBean.getText(),messageBean.getUserIp());
-            mPeerListRvAdapter.addItemBadge(messageBean.getUserIp());
-        }
-        EventBus.getDefault().post(messageBean);
     }
 
     @Override
-    public void addPeer(PeerBean peerBean) {
-        Log.d(TAG, "addPeer: "+peerBean.getUserIp());
-        mRvPeerList.setVisibility(View.VISIBLE);
-        mLlLoadingPeersInfo.setVisibility(View.GONE);
-        mTvTipNonePeer.setVisibility(View.GONE);
-        if (mPeerListRvAdapter.isContained(peerBean.getUserIp())){
-            mPeerListRvAdapter.updateItem(peerBean);
-        }else {
-            mPeerListRvAdapter.addItem(peerBean);
-        }
-        EventBus.getDefault().post(new LinkSocketResponseEvent(true,peerBean));
+    public void addGroup(GroupBean groupBean) {
     }
 
     @Override
-    public void removePeer(String ip) {
-        mPeerListRvAdapter.removeItem(ip);
-        if (mPeerListRvAdapter.getDataList().size() == 0){
-            mRvPeerList.setVisibility(View.GONE);
-            mLlLoadingPeersInfo.setVisibility(View.GONE);
-            mTvTipNonePeer.setVisibility(View.VISIBLE);
-        }
+    public void removeGroup(String ip) {
     }
 
     @Override
@@ -251,12 +221,12 @@ public class GroupChatFragment extends BaseFragment<PeerListPresenter> implement
     }
 
     @Override
-    public void linkPeerSuccess(String ip) {
+    public void linkGroupSuccess(String ip) {
         showToast("连接 Socket 成功！");
     }
 
     @Override
-    public void linkPeerError(String message,String targetIp) {
+    public void linkGroupError(String message,String targetIp) {
         showToast(message);
         PeerBean peerBean = new PeerBean();
         peerBean.setUserIp(targetIp);
@@ -265,7 +235,7 @@ public class GroupChatFragment extends BaseFragment<PeerListPresenter> implement
 
     @Override
     public void initServerSocketSuccess() {
-        mPresenter.linkPeers(mPeerList);
+        mPresenter.linkGroups(mGroupList);
     }
 
     public class WifiReceiver extends BroadcastReceiver {

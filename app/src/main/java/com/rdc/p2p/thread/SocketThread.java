@@ -20,6 +20,7 @@ import com.rdc.p2p.config.Protocol;
 import com.rdc.p2p.contract.PeerListContract;
 import com.rdc.p2p.listener.OnSocketSendCallback;
 import com.rdc.p2p.manager.SocketManager;
+import com.rdc.p2p.model.PeerListModel;
 import com.rdc.p2p.state.SendMsgState.FileMsgState;
 import com.rdc.p2p.state.SendMsgState.ImageMsgState;
 import com.rdc.p2p.state.SendMsgState.SendMsgContext;
@@ -37,6 +38,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -51,6 +53,7 @@ public class SocketThread extends Thread {
     private static final int DELAY_DESTROY = 1;
     private static final String TAG = "SocketThread";
     private static final int DELAY_MILLIS = 1000 * 60 * 60;
+    public PeerBean peer;
     private Socket mSocket;
     private PeerListContract.Presenter mPresenter;
     private String mTargetIp;
@@ -70,6 +73,7 @@ public class SocketThread extends Thread {
         mKeepUser = false;
         this.mSocket = mSocket;
         this.mPresenter = mPresenter;
+        peer = null;
         mIsFileReceived = new AtomicBoolean(true);
         mHandlerThread = new HandlerThread("HandlerThread");
         mHandlerThread.start();
@@ -230,6 +234,7 @@ public class SocketThread extends Thread {
                         Log.d(TAG, "连接到" + mTargetIp);
                         String u1 = dis.readUTF();
                         PeerBean peerInfo = getPeer(u1);
+                        PeerListModel.peerBeans.add(peerInfo);
                         // 找到曾经的聊天记录
                         myDnsBean = new MyDnsBean(peerInfo.getUserIp(), peerInfo.getNickName());
                         myDnsBean.save();

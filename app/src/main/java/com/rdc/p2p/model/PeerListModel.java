@@ -31,6 +31,7 @@ public class PeerListModel implements PeerListContract.Model {
 
     public static final String TAG = "PeerListModel";
 
+    public static List<PeerBean> peerBeans;
     /**
      * 核心池大小
      **/
@@ -49,6 +50,7 @@ public class PeerListModel implements PeerListContract.Model {
     public PeerListModel(PeerListContract.Presenter presenter) {
         mPresenter = presenter;
         isInitServerSocket = new AtomicBoolean(false);
+        peerBeans = new ArrayList<>();
     }
 
     @Override

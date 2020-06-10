@@ -5,5 +5,9 @@
         android:id="@+id/menu_search"
         android:title="@string/search_device"
         app:showAsAction="always"/>
+    <item android:icon="@drawable/ic_addto"
+        android:id="@+id/menu_add"
+        android:title="@string/add_group_chat"
+        app:showAsAction="always"/>
 
 </menu>

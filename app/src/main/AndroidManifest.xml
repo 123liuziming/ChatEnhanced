@@ -55,6 +55,9 @@
         <activity
             android:name=".activity.PhotoActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.AddGroupActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

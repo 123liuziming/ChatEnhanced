@@ -306,4 +306,7 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
             }
         }
     }
+    public List<String> getPeerList(){
+        return mPeerList;
+    }
 }

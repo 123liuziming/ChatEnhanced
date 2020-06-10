@@ -1,6 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-</android.support.constraint.ConstraintLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:orientation="horizontal"
+    android:background="?attr/selectableItemBackground"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:button="@mipmap/select_unchecked"
+        android:clickable="false"
+        android:contentDescription="@null" />
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/civ_user_image_item_peer_list"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:scaleType="centerCrop"
+        tools:src="@drawable/iv_9" />
+    <TextView
+        android:id="@+id/tv_nickname_item_peer_list"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="8dp"
+        android:maxLength="15"
+        android:singleLine="true"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:gravity="center"
+        tools:text="指针" />
+
+
+
+</LinearLayout>

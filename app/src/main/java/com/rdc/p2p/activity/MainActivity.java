@@ -1,46 +1,36 @@
 package com.rdc.p2p.activity;
 
-import android.Manifest;
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.os.Build;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.rdc.p2p.R;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
-import com.rdc.p2p.fragment.FragmentCommon;
+import com.rdc.p2p.bean.GroupBean;
+import com.rdc.p2p.fragment.GroupListFragment;
 import com.rdc.p2p.fragment.PeerListFragment;
 import com.rdc.p2p.fragment.PersonalDetailFragment;
 import com.rdc.p2p.fragment.ScanDeviceFragment;
-import com.rdc.p2p.manager.SocketManager;
 import com.ycl.tabview.library.TabView;
 import com.ycl.tabview.library.TabViewChild;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
@@ -86,10 +76,13 @@ public class MainActivity extends BaseActivity {
         }
     });
     private PeerListFragment mPeerListFragment;
+    private int currentPosition;
+    private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
     }
 
     @Override
@@ -156,7 +149,7 @@ public class MainActivity extends BaseActivity {
         mPeerListFragment = new PeerListFragment();
         List<TabViewChild> tabViewChildList = new ArrayList<>();
         TabViewChild tabViewChild01 = new TabViewChild(R.drawable.tab01_sel, R.drawable.tab01_unsel, "聊天", mPeerListFragment);
-        TabViewChild tabViewChild02 = new TabViewChild(R.drawable.tab02_sel, R.drawable.tab02_unsel, "群聊", FragmentCommon.newInstance("群聊"));
+        TabViewChild tabViewChild02 = new TabViewChild(R.drawable.tab02_sel, R.drawable.tab02_unsel, "群聊", new GroupListFragment());
         TabViewChild tabViewChild05 = new TabViewChild(R.drawable.tab05_sel, R.drawable.tab05_unsel, "我的", new PersonalDetailFragment());
         tabViewChildList.add(tabViewChild01);
         tabViewChildList.add(tabViewChild02);
@@ -164,6 +157,14 @@ public class MainActivity extends BaseActivity {
         //end add data
         tabView.setTabViewDefaultPosition(0);
         tabView.setTabViewChild(tabViewChildList, getSupportFragmentManager());
+        TabView.OnTabChildClickListener onTabChildClickListener = new TabView.OnTabChildClickListener() {
+            @Override
+            public void onTabChildClick(int position, ImageView imageView, TextView textView) {
+                currentPosition = position;
+                invalidateOptionsMenu();
+            }
+        };
+        tabView.setOnTabChildClickListener(onTabChildClickListener);
     }
 
     private void initToolbar() {
@@ -183,7 +184,24 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // 动态设置ToolBar状态
+        switch (currentPosition) {
+            case 0:
+                menu.findItem(R.id.menu_search).setVisible(true);
+                menu.findItem(R.id.menu_add).setVisible(false);
+                break;
+            case 1:
+                menu.findItem(R.id.menu_search).setVisible(true);
+                menu.findItem(R.id.menu_add).setVisible(true);
+                break;
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG,"click menu");
         switch (item.getItemId()) {
             case R.id.menu_search:
                 if (mPeerListFragment.isServerSocketConnected()) {
@@ -194,6 +212,11 @@ public class MainActivity extends BaseActivity {
                     showToast("ServerSocket未连接，请检查WIFI！");
                 }
                 break;
+            case R.id.menu_add:
+                Intent intent = new Intent();
+                intent.setClass(mContext,AddGroupActivity.class);
+                startActivityForResult(intent,3);
+                break;
 //            case android.R.id.home:
 //                mDrawerLayout.openDrawer(GravityCompat.START);
 //                break;
@@ -203,11 +226,18 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Log.d(TAG,"return from activity"+requestCode);
         switch (requestCode) {
             case 1:
-                if(resultCode == RESULT_OK) {
+                if (resultCode == RESULT_OK) {
                     mPeerListFragment.getmPeerListRvAdapter().updateItemText("", data.getStringExtra("ip"));
                 }
+                break;
+            case 3:
+                String groupJson = data.getStringExtra("groupBean");
+                GroupBean groupBean = new Gson().fromJson(groupJson,GroupBean.class);
+                break;
         }
     }
 

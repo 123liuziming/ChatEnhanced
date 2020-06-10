@@ -1,6 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:theme="@style/Theme.AppCompat.NoActionBar"
+    android:focusableInTouchMode="true">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        app:popupTheme="@style/AppToolbarPopupTheme"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-</android.support.constraint.ConstraintLayout>
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="添加群聊"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_title"
+            android:textStyle="bold" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:gravity="right"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:background="@drawable/buttonshapegraybg"
+                android:fontFamily="@font/calibri"
+                android:text="确认"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:id="@+id/check_button"/>
+
+
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="10dp"
+        android:orientation="vertical">
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColorHint="#808080"
+            >
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:drawablePadding="16dp"
+                android:drawableRight="@drawable/ic_group"
+                android:fontFamily="@font/calibri"
+                android:hint="群聊名字"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:id="@+id/group_name"/>
+        </android.support.design.widget.TextInputLayout>
+    </LinearLayout>
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/rv_peer_list_fragment_peer_list"
+        android:visibility="gone"
+        android:paddingTop="10dp"
+        >
+    </android.support.v7.widget.RecyclerView>
+
+</LinearLayout>
