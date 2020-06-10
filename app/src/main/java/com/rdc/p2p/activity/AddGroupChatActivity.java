@@ -143,6 +143,14 @@ public class AddGroupChatActivity extends BaseActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        setResult(RESULT_CANCELED, intent);
+        finish();
+        super.onBackPressed();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -156,11 +164,15 @@ public class AddGroupChatActivity extends BaseActivity {
                         userCheckList.add(allUserList.get(i));
                     }
                 }
+                if(userCheckList.size()==0){
+                    showToast("请选择用户");
+                    break;
+                }
                 Intent intent = new Intent();
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("userList",(Serializable)userCheckList);
+                bundle.putSerializable("returnUserList",(Serializable)userCheckList);
                 intent.putExtras(bundle);
-                setResult(RESULT_CANCELED,intent);
+                setResult(RESULT_OK,intent);
                 // 开始发送Socket请求处理
                 finish();
                 break;

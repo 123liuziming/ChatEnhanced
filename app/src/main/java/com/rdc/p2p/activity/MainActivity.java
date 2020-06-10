@@ -10,10 +10,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
 import com.rdc.p2p.R;
 import com.rdc.p2p.base.BaseActivity;
@@ -72,6 +71,7 @@ public class MainActivity extends BaseActivity {
         }
     });
     private PeerListFragment mPeerListFragment;
+    public final int ADD_GROUPCHAT_ACTIVITY_REQUEST_CODE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,7 +195,7 @@ public class MainActivity extends BaseActivity {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("userList",(Serializable)userList);
                 intent.putExtras(bundle);
-                startActivity(intent);
+                startActivityForResult(intent, ADD_GROUPCHAT_ACTIVITY_REQUEST_CODE);
                 break;
 //            case android.R.id.home:
 //                mDrawerLayout.openDrawer(GravityCompat.START);
@@ -211,9 +211,17 @@ public class MainActivity extends BaseActivity {
                 if(resultCode == RESULT_OK) {
                     mPeerListFragment.getmPeerListRvAdapter().updateItemText("", data.getStringExtra("ip"));
                 }
-                else if(resultCode == RESULT_CANCELED){
+                break;
+            case ADD_GROUPCHAT_ACTIVITY_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
                     // 群聊创建返回主界面，发送群聊请求
+                    List<PeerBean> checkedUserList = (List<PeerBean>) data.getExtras().getSerializable("returnUserList");
+
                 }
+                else if(resultCode == RESULT_CANCELED){
+                    // 返回界面，什么也不做
+                }
+                break;
         }
     }
 
