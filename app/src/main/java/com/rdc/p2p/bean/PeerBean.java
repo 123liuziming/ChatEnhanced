@@ -2,13 +2,14 @@ package com.rdc.p2p.bean;
 
 import android.annotation.SuppressLint;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * Created by Lin Yaotian on 2018/5/16.
  */
-public class PeerBean {
+public class PeerBean implements Serializable {
     private int userImageId;
     private String nickName;
     private String recentMessage;

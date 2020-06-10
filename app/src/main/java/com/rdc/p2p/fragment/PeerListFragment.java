@@ -41,6 +41,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Vector;
 
 import butterknife.BindView;
 
@@ -75,6 +76,9 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
         }
     });
 
+    public List<PeerBean> getUserList() {
+        return mPeerListRvAdapter.getDataList();
+    }
 
     public PeerListRvAdapter getmPeerListRvAdapter() {
         return mPeerListRvAdapter;

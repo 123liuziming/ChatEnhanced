@@ -92,8 +92,8 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     private static final int HIDE_SOFT_INPUT = -2;//隐藏软键盘
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
-    @BindView(R.id.tv_title)
-    TextView mTvTitle;
+//    @BindView(R.id.tv_title)
+//    TextView mTvTitle;
     @BindView(R.id.iv_photo_album_act_chat_detail)
     ImageView mIvPhotoAlbum;
     @BindView(R.id.iv_take_photo_act_chat_detail)
@@ -264,8 +264,8 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
 
     @Override
     protected void initView() {
-        initToolbar();
-        mTvTitle.setText(mTargetPeerName);
+        initToolbar(mTargetPeerName);
+//        mTvTitle.setText(mTargetPeerName);
         mMsgRvAdapter = new MsgRvAdapter(mTargetPeerImageId);
         LinearLayoutManager mLLManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRvMsgList.setLayoutManager(mLLManager);
@@ -684,14 +684,14 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         return false;
     }
 
-    private void initToolbar() {
+    private void initToolbar(String targetPeerName) {
         setSupportActionBar(mToolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowTitleEnabled(false);
+//            actionBar.setDisplayShowTitleEnabled(false);
         }
-        mToolbar.setTitle("");
+        mToolbar.setTitle(targetPeerName);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

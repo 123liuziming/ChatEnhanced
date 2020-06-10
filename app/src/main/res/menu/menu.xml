@@ -4,6 +4,9 @@
     <item android:icon="@drawable/iv_search"
         android:id="@+id/menu_search"
         android:title="@string/search_device"
-        app:showAsAction="always"/>
-
+        app:showAsAction="ifRoom"/>
+    <item android:icon="@drawable/iv_chat_normal"
+        android:id="@+id/menu_createGroupChat"
+        android:title="@string/createGroupChat"
+        app:showAsAction="ifRoom"/>
 </menu>

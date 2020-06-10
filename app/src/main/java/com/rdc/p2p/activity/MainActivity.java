@@ -1,46 +1,32 @@
 package com.rdc.p2p.activity;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rdc.p2p.R;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
+import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.fragment.FragmentCommon;
 import com.rdc.p2p.fragment.PeerListFragment;
 import com.rdc.p2p.fragment.PersonalDetailFragment;
 import com.rdc.p2p.fragment.ScanDeviceFragment;
-import com.rdc.p2p.manager.SocketManager;
 import com.ycl.tabview.library.TabView;
 import com.ycl.tabview.library.TabViewChild;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
@@ -171,9 +157,9 @@ public class MainActivity extends BaseActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(false);
-            actionBar.setDisplayShowTitleEnabled(false);
+//            actionBar.setDisplayShowTitleEnabled(false);
         }
-        mToolbar.setTitle("");
+        getSupportActionBar().setTitle("主界面");
     }
 
     @Override
@@ -184,15 +170,32 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         switch (item.getItemId()) {
             case R.id.menu_search:
                 if (mPeerListFragment.isServerSocketConnected()) {
                     ScanDeviceFragment mScanDeviceFragment = new ScanDeviceFragment();
+                    // 正在扫面中，设置为false，此时无法使用返回键返回
                     mScanDeviceFragment.setCancelable(false);
                     mScanDeviceFragment.show(getSupportFragmentManager(), "scanDevice");
                 } else {
                     showToast("ServerSocket未连接，请检查WIFI！");
                 }
+                break;
+            case R.id.menu_createGroupChat:
+//                List<PeerBean> userList = mPeerListFragment.getUserList();
+                // 先模拟数据进行测试
+                List<PeerBean> userList = new ArrayList<>();
+                PeerBean peerBean = new PeerBean();
+                peerBean.setNickName("JOJO");
+                peerBean.setUserImageId(10);
+                userList.add(peerBean);
+                Intent intent = new Intent(getApplicationContext(), AddGroupChatActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("userList",(Serializable)userList);
+                intent.putExtras(bundle);
+                startActivity(intent);
                 break;
 //            case android.R.id.home:
 //                mDrawerLayout.openDrawer(GravityCompat.START);
@@ -207,6 +210,9 @@ public class MainActivity extends BaseActivity {
             case 1:
                 if(resultCode == RESULT_OK) {
                     mPeerListFragment.getmPeerListRvAdapter().updateItemText("", data.getStringExtra("ip"));
+                }
+                else if(resultCode == RESULT_CANCELED){
+                    // 群聊创建返回主界面，发送群聊请求
                 }
         }
     }
