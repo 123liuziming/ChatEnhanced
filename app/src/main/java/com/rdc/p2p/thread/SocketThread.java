@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseMsgState;
+import com.rdc.p2p.bean.GroupBean;
 import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.MyDnsBean;
 import com.rdc.p2p.bean.PeerBean;
@@ -18,6 +19,7 @@ import com.rdc.p2p.config.Constant;
 import com.rdc.p2p.config.FileState;
 import com.rdc.p2p.config.Protocol;
 import com.rdc.p2p.contract.PeerListContract;
+import com.rdc.p2p.event.LinkGroupSocketResponseEvent;
 import com.rdc.p2p.listener.OnSocketSendCallback;
 import com.rdc.p2p.manager.SocketManager;
 import com.rdc.p2p.model.PeerListModel;
@@ -29,6 +31,7 @@ import com.rdc.p2p.util.GsonUtil;
 import com.rdc.p2p.util.MyDnsUtil;
 import com.rdc.p2p.util.SDUtil;
 
+import org.greenrobot.eventbus.EventBus;
 import org.litepal.crud.DataSupport;
 
 import java.io.DataInputStream;
@@ -38,6 +41,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -210,6 +214,23 @@ public class SocketThread extends Thread {
         return true;
     }
 
+    /**
+     * 发送群聊请求
+     * @param groupBean 群聊成员信息
+     * @return
+     */
+    public boolean sendGroupChatRequest(GroupBean groupBean) {
+        mHandler.sendEmptyMessage(DELAY_DESTROY);
+        try {
+            DataOutputStream dos = new DataOutputStream(mSocket.getOutputStream());
+            dos.writeInt(Protocol.ADD_GROUP_CHAT_REQUEST);
+            dos.writeUTF(GsonUtil.gsonToJson(groupBean));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public void run() {
@@ -222,6 +243,10 @@ public class SocketThread extends Thread {
                 int type = dis.readInt();
                 mHandler.sendEmptyMessage(DELAY_DESTROY);
                 switch (type) {
+                    case Protocol.ADD_GROUP_CHAT_REQUEST:
+                        GroupBean groupBean = GsonUtil.gsonToBean(dis.readUTF(), GroupBean.class);
+                        EventBus.getDefault().post(new LinkGroupSocketResponseEvent(true,groupBean));
+                        break;
                     case Protocol.DISCONNECT:
                         Log.d(TAG, "Protocol disconnect ! ip=" + mTargetIp);
                         mKeepUser = false;

@@ -23,10 +23,13 @@ import com.rdc.p2p.R;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.bean.GroupBean;
+import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.fragment.GroupListFragment;
 import com.rdc.p2p.fragment.PeerListFragment;
 import com.rdc.p2p.fragment.PersonalDetailFragment;
 import com.rdc.p2p.fragment.ScanDeviceFragment;
+import com.rdc.p2p.manager.SocketManager;
+import com.rdc.p2p.thread.SocketThread;
 import com.ycl.tabview.library.TabView;
 import com.ycl.tabview.library.TabViewChild;
 
@@ -35,6 +38,9 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 
@@ -237,6 +243,26 @@ public class MainActivity extends BaseActivity {
             case 3:
                 String groupJson = data.getStringExtra("groupBean");
                 GroupBean groupBean = new Gson().fromJson(groupJson,GroupBean.class);
+                ThreadPoolExecutor mExecutor = new ThreadPoolExecutor(1, 255,
+                        1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(
+                        255));
+                // 向所有IP地址发送一个
+                for (final PeerBean pb : groupBean.getPeerBeanList()) {
+                    Log.d(TAG,"选取的用户为："+pb.getNickName());
+                    mExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            SocketThread socketThread = SocketManager.getInstance().getSocketThreadByIp(pb.getUserIp());
+                            if (socketThread != null) {
+                                socketThread.sendGroupChatRequest(groupBean);
+                            } else {
+                                showToast("目标用户连接已断开");
+                            }
+                        }
+                    });
+                }
+                showToast("邀请已发送");
+                mExecutor.shutdown();
                 break;
         }
     }
