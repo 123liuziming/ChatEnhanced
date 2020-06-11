@@ -32,6 +32,9 @@ import com.rdc.p2p.thread.SocketThread;
 import com.ycl.tabview.library.TabView;
 import com.ycl.tabview.library.TabViewChild;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -225,32 +228,21 @@ public class MainActivity extends BaseActivity {
             case ADD_GROUPCHAT_ACTIVITY_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     // 群聊创建返回主界面，发送群聊请求
-                    List<PeerBean> checkedUserList = (List<PeerBean>) data.getExtras().getSerializable("returnUserList");
-                    final MessageBean messageBean = MessageBean.getInstance("");
-                    messageBean.setMsgType(Protocol.ADD_GROUP_CHAT);
-                    StringBuilder sb = new StringBuilder();
-                    for (PeerBean pb : checkedUserList){
-                        //使用 来区分
-                        sb.append(pb.getUserIp()+" ");
-                    }
-                    messageBean.setText(sb.toString());
+                    final List<PeerBean> checkedUserList = (List<PeerBean>) data.getExtras().getSerializable("returnUserList");
                     ThreadPoolExecutor mExecutor = new ThreadPoolExecutor(1, 255,
                             1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(
                             255));
                     // 向所有IP地址发送一个
                     for (final PeerBean pb : checkedUserList) {
-                        Log.d(TAG,"当前发送用户："+pb.getNickName());
+                        Log.d(TAG,"选取的用户为："+pb.getNickName());
                         mExecutor.execute(new Runnable() {
                             @Override
                             public void run() {
-                                synchronized (messageBean){
-                                    SocketThread socketThread = SocketManager.getInstance().getSocketThreadByIp(pb.getUserIp());
-                                    messageBean.setUserIp(pb.getUserIp());
-                                    if (socketThread != null) {
-                                        socketThread.sendGroupChatRequest(messageBean);
-                                    } else {
-                                        showToast("目标用户连接已断开");
-                                    }
+                                SocketThread socketThread = SocketManager.getInstance().getSocketThreadByIp(pb.getUserIp());
+                                if (socketThread != null) {
+                                    socketThread.sendGroupChatRequest(checkedUserList);
+                                } else {
+                                    showToast("目标用户连接已断开");
                                 }
                             }
                         });
@@ -272,4 +264,8 @@ public class MainActivity extends BaseActivity {
 //        mLlBottomRight.setOnClickListener(this);
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void createGroupChatRoom(List<PeerBean> groupMembers){
+        
+    }
 }

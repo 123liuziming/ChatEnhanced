@@ -17,12 +17,14 @@ import com.rdc.p2p.config.Constant;
 import com.rdc.p2p.config.FileState;
 import com.rdc.p2p.config.Protocol;
 import com.rdc.p2p.contract.PeerListContract;
+import com.rdc.p2p.event.ReceiveGroupChatInvitationEvent;
 import com.rdc.p2p.listener.OnSocketSendCallback;
 import com.rdc.p2p.manager.SocketManager;
 import com.rdc.p2p.util.GsonUtil;
 import com.rdc.p2p.util.MyDnsUtil;
 import com.rdc.p2p.util.SDUtil;
 
+import org.greenrobot.eventbus.EventBus;
 import org.litepal.crud.DataSupport;
 
 import java.io.DataInputStream;
@@ -297,7 +299,8 @@ public class SocketThread extends Thread {
                 mHandler.sendEmptyMessage(DELAY_DESTROY);
                 switch (type) {
                     case Protocol.ADD_GROUP_CHAT:
-
+                        List<PeerBean> groupMembers = getGroupMembers(dis.readUTF());
+                        EventBus.getDefault().post(new ReceiveGroupChatInvitationEvent(groupMembers));
                         break;
                     case Protocol.DISCONNECT:
                         Log.d(TAG, "Protocol disconnect ! ip=" + mTargetIp);
@@ -487,13 +490,9 @@ public class SocketThread extends Thread {
         return peer;
     }
 
-    private PeerBean getGroupMembers(String userGson) {
-        UserBean userBean = GsonUtil.gsonToBean(userGson, UserBean.class);
-        PeerBean peer = new PeerBean();
-        peer.setUserIp(mTargetIp);
-        peer.setUserImageId(userBean.getUserImageId());
-        peer.setNickName(userBean.getNickName());
-        return peer;
+    private List<PeerBean> getGroupMembers(String userGson) {
+        List<PeerBean> groupMembers = GsonUtil.gsonToList(userGson,PeerBean.class);
+        return groupMembers;
     }
 
     private void setLatestMsg(List<MessageBean> allMsg, PeerBean peerInfo) {
