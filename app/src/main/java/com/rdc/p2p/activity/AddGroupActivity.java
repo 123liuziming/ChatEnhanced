@@ -10,21 +10,20 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.rdc.p2p.R;
 import com.rdc.p2p.adapter.AddGroupPeerRvAdapter;
-import com.rdc.p2p.adapter.GroupListRvAdapter;
+import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.bean.GroupBean;
 import com.rdc.p2p.bean.PeerBean;
+import com.rdc.p2p.bean.UserBean;
 import com.rdc.p2p.model.PeerListModel;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
@@ -92,6 +91,12 @@ public class AddGroupActivity extends BaseActivity {
                     Toast.makeText(mBaseActivity,"群聊名字不能为空",Toast.LENGTH_SHORT).show();
                     return;
                 }
+                UserBean userBean = App.getUserBean();
+                PeerBean myself = new PeerBean();
+                myself.setNickName(userBean.getNickName());
+                myself.setUserIp(App.getMyIP());
+                myself.setUserImageId(userBean.getUserImageId());
+                mPeerListRvAdapter.selectPeer.add(myself);
                 GroupBean groupBean = new GroupBean();
                 groupBean.setNickName(groupName.getText().toString());
                 groupBean.setPeerBeanList(mPeerListRvAdapter.selectPeer);

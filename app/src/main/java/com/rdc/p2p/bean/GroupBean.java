@@ -3,6 +3,7 @@ package com.rdc.p2p.bean;
 import android.annotation.SuppressLint;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -13,6 +14,9 @@ public class GroupBean {
     private String time;
     private int msgNum = 0; // 未读消息数量
     private List<PeerBean> peerBeanList;
+    public GroupBean(){
+        peerBeanList= new ArrayList<>();
+    }
     @Override
     public String toString() {
         return "GroupBean{" +
@@ -41,7 +45,7 @@ public class GroupBean {
     }
 
     public String getRecentMessage() {
-        return nickName == null ? "" : nickName;
+        return recentMessage == null ? "" : recentMessage;
     }
 
     public void setRecentMessage(String recentMessage) {

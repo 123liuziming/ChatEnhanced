@@ -22,27 +22,7 @@
         android:textColor="@color/colorPrimary"
         android:textSize="@dimen/text_size_normal"
         android:text="@string/tip_none_peers"
-        android:visibility="gone"
+        android:visibility="visible"
         />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:id="@+id/ll_loadingPeersInfo_fragment_peer_list"
-        >
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/text_size_normal"
-            android:textColor="@color/colorPrimary"
-            android:layout_marginTop="20dp"
-            android:text="@string/loadingPeersInfo" />
-    </LinearLayout>
 
 </RelativeLayout>
