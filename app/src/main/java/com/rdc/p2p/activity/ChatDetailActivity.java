@@ -162,6 +162,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
+        showToast("ChatDetailActivity启动啦，可以接收消息了");
     }
 
     // 活动被销毁时保存信息
@@ -381,6 +382,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mBtnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // 开始发送的按钮
                 if (!TextUtils.isEmpty(getString(mEtInput))) {
                     MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
                     textMsg.setMine(true);
@@ -711,7 +713,8 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     //更新RecyclerView视图
                     mMsgRvAdapter.notifyItemChanged(position, Constant.UPDATE_FILE_STATE);
                 }
-            } else {
+            }
+            else {
                 //其他消息直接添加到数据源中并更新RecyclerView界面
                 mMsgRvAdapter.appendData(messageBean);
                 mHandler.sendEmptyMessage(SCROLL);

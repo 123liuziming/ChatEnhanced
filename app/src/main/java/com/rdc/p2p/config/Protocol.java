@@ -15,4 +15,5 @@ public class Protocol {
     public static final int DISCONNECT = 5;//断开连接
     public static final int KEEP_USER = 6;//保留用户
     public static final int KEEP_USER_RESPONSE = 9;
+    public static final int ADD_GROUP_CHAT = 10; //加入群聊
 }

@@ -266,6 +266,24 @@ public class SocketThread extends Thread {
         return true;
     }
 
+    /**
+     * 发送群聊请求
+     * @param groupMembers 群聊成员信息
+     * @return
+     */
+    public boolean sendGroupChatRequest(List<PeerBean> groupMembers) {
+        mHandler.sendEmptyMessage(DELAY_DESTROY);
+        try {
+            DataOutputStream dos = new DataOutputStream(mSocket.getOutputStream());
+            dos.writeInt(Protocol.ADD_GROUP_CHAT);
+            dos.writeUTF(GsonUtil.gsonToJsonArray(groupMembers));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
 
     @Override
     public void run() {
@@ -278,6 +296,9 @@ public class SocketThread extends Thread {
                 int type = dis.readInt();
                 mHandler.sendEmptyMessage(DELAY_DESTROY);
                 switch (type) {
+                    case Protocol.ADD_GROUP_CHAT:
+
+                        break;
                     case Protocol.DISCONNECT:
                         Log.d(TAG, "Protocol disconnect ! ip=" + mTargetIp);
                         mKeepUser = false;
@@ -458,6 +479,15 @@ public class SocketThread extends Thread {
      */
     @NonNull
     private PeerBean getPeer(String userGson) {
+        UserBean userBean = GsonUtil.gsonToBean(userGson, UserBean.class);
+        PeerBean peer = new PeerBean();
+        peer.setUserIp(mTargetIp);
+        peer.setUserImageId(userBean.getUserImageId());
+        peer.setNickName(userBean.getNickName());
+        return peer;
+    }
+
+    private PeerBean getGroupMembers(String userGson) {
         UserBean userBean = GsonUtil.gsonToBean(userGson, UserBean.class);
         PeerBean peer = new PeerBean();
         peer.setUserIp(mTargetIp);

@@ -13,15 +13,22 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.rdc.p2p.R;
+import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
+import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.PeerBean;
+import com.rdc.p2p.config.FileState;
+import com.rdc.p2p.config.Protocol;
 import com.rdc.p2p.fragment.FragmentCommon;
 import com.rdc.p2p.fragment.PeerListFragment;
 import com.rdc.p2p.fragment.PersonalDetailFragment;
 import com.rdc.p2p.fragment.ScanDeviceFragment;
+import com.rdc.p2p.manager.SocketManager;
+import com.rdc.p2p.thread.SocketThread;
 import com.ycl.tabview.library.TabView;
 import com.ycl.tabview.library.TabViewChild;
 
@@ -30,6 +37,9 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 
@@ -183,13 +193,13 @@ public class MainActivity extends BaseActivity {
                 }
                 break;
             case R.id.menu_createGroupChat:
-//                List<PeerBean> userList = mPeerListFragment.getUserList();
+                List<PeerBean> userList = mPeerListFragment.getUserList();
                 // 先模拟数据进行测试
-                List<PeerBean> userList = new ArrayList<>();
-                PeerBean peerBean = new PeerBean();
-                peerBean.setNickName("JOJO");
-                peerBean.setUserImageId(10);
-                userList.add(peerBean);
+//                List<PeerBean> userList = new ArrayList<>();
+//                PeerBean peerBean = new PeerBean();
+//                peerBean.setNickName("JOJO");
+//                peerBean.setUserImageId(10);
+//                userList.add(peerBean);
                 Intent intent = new Intent(getApplicationContext(), AddGroupChatActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 Bundle bundle = new Bundle();
@@ -216,6 +226,37 @@ public class MainActivity extends BaseActivity {
                 if (resultCode == RESULT_OK) {
                     // 群聊创建返回主界面，发送群聊请求
                     List<PeerBean> checkedUserList = (List<PeerBean>) data.getExtras().getSerializable("returnUserList");
+                    final MessageBean messageBean = MessageBean.getInstance("");
+                    messageBean.setMsgType(Protocol.ADD_GROUP_CHAT);
+                    StringBuilder sb = new StringBuilder();
+                    for (PeerBean pb : checkedUserList){
+                        //使用 来区分
+                        sb.append(pb.getUserIp()+" ");
+                    }
+                    messageBean.setText(sb.toString());
+                    ThreadPoolExecutor mExecutor = new ThreadPoolExecutor(1, 255,
+                            1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(
+                            255));
+                    // 向所有IP地址发送一个
+                    for (final PeerBean pb : checkedUserList) {
+                        Log.d(TAG,"当前发送用户："+pb.getNickName());
+                        mExecutor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (messageBean){
+                                    SocketThread socketThread = SocketManager.getInstance().getSocketThreadByIp(pb.getUserIp());
+                                    messageBean.setUserIp(pb.getUserIp());
+                                    if (socketThread != null) {
+                                        socketThread.sendGroupChatRequest(messageBean);
+                                    } else {
+                                        showToast("目标用户连接已断开");
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    showToast("邀请已发送");
+                    mExecutor.shutdown();
 
                 }
                 else if(resultCode == RESULT_CANCELED){
@@ -231,73 +272,4 @@ public class MainActivity extends BaseActivity {
 //        mLlBottomRight.setOnClickListener(this);
     }
 
-//    @Override
-//    public void onClick(View view) {
-//        switch (view.getId()){
-//            case R.id.ll_bottom_right_layout_act_main:
-//                mIvChat.setImageResource(R.drawable.iv_chat_pressed);
-//                mTvChat.setTextColor(getResources().getColor(R.color.colorPrimary));
-//                mIvPeerList.setImageResource(R.drawable.iv_peer_list_normal);
-//                mTvPeerList.setTextColor(getResources().getColor(R.color.grey_text_or_bg));
-//                break;
-//            case R.id.ll_bottom_left_layout_act_main:
-//                mIvChat.setImageResource(R.drawable.iv_chat_normal);
-//                mTvChat.setTextColor(getResources().getColor(R.color.grey_text_or_bg));
-//                mIvPeerList.setImageResource(R.drawable.iv_peer_list_pressed);
-//                mTvPeerList.setTextColor(getResources().getColor(R.color.colorPrimary));
-//                Log.d(TAG, "SocketManager:"+ SocketManager.getInstance().toString());
-//                break;
-//        }
-//    }
-
-
-//    private void initServerSocket() {
-//        try {
-//            mSocket = new MulticastSocket(BROADCAST_PORT);
-//            mAddress = InetAddress.getByName(BROADCAST_IP);
-//            mSocket.setTimeToLive(2);
-//            mSocket.joinGroup(mAddress);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    private void receiveBroadcast(){
-//        byte buf[] = new byte[1024];
-//        DatagramPacket packet = new DatagramPacket(buf,buf.length,mAddress,BROADCAST_PORT);
-//        try {
-//            mSocket.receive(packet);
-//            String content = new String(buf,0,packet.getLength());
-//            Log.d(TAG, "receiveBroadcast: "+content);
-//            MessageEntity message = new MessageEntity();
-//            message.what = 0;
-//            message.obj = content;
-//            mHandler.sendMessage(message);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    private void sendMultiBroadcast(){
-//        DatagramPacket packet;
-//        String msg = mEtInput.getText().toString();
-//        if (!msg.equals("")){
-//            byte[] bytes = msg.getBytes();
-//            packet = new DatagramPacket(bytes,bytes.length,mAddress,BROADCAST_PORT);
-//            try {
-//                mSocket.send(packet);
-//                Log.d(TAG, "sendMultiBroadcast: success");
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                Log.d(TAG, "sendMultiBroadcast: error");
-//            }
-//        }else {
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    Toast.makeText(MainActivity.this, "输入不能为空！", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//        }
-//    }
 }
