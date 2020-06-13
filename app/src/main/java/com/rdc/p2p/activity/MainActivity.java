@@ -234,6 +234,8 @@ public class MainActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         Log.d(TAG,"return from activity"+requestCode);
+        if(data == null)
+            return;
         switch (requestCode) {
             case 1:
                 if (resultCode == RESULT_OK) {
