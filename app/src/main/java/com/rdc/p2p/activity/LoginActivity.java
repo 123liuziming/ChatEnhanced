@@ -205,8 +205,10 @@ public class LoginActivity extends BaseActivity {
 
                                 @Override
                                 public void onFailure(@NotNull ApolloException e) {
+                                    Looper.prepare();
                                     Log.e(TAG, e.getLocalizedMessage(), e);
                                     showToast("登录失败！");
+                                    Looper.loop();
                                 }
                             });
 
