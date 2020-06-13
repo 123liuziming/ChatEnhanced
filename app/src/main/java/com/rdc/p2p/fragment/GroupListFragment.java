@@ -1,5 +1,6 @@
 package com.rdc.p2p.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.rdc.p2p.R;
+import com.rdc.p2p.activity.GroupChatActivity;
 import com.rdc.p2p.adapter.GroupListRvAdapter;
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseFragment;
@@ -126,7 +128,14 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
         mGroupListRvAdapter.setOnRecyclerViewListener(new OnClickRecyclerViewListener() {
             @Override
             public void onItemClick(int position) {
-                Log.d(TAG,"弹出群聊消息界面");
+                //这里进入群聊
+                Intent it = new Intent(getActivity(), GroupChatActivity.class);
+                Bundle bundle = new Bundle();
+                //传入需要的参数
+                GroupBean groupBean= mGroupList.get(position);
+                bundle.putString("title",groupBean.getNickName());
+                it.putExtras(bundle);
+                startActivity(it);
             }
             @Override
             public boolean onItemLongClick(int position) {
