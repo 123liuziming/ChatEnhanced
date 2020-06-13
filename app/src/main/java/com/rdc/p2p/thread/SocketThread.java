@@ -387,8 +387,10 @@ public class SocketThread extends Thread {
         LatestMessageStrategy strategy = new LatestMessageStrategy();
         MessageContext context = new MessageContext(strategy);
         MessageBean latestMsg =  context.executeStrategy(allMsg);
-        peerInfo.setRecentMessage(latestMsg.getText());
-        mPresenter.addPeer(peerInfo);
+        if(latestMsg != null) {
+            peerInfo.setRecentMessage(latestMsg.getText());
+            mPresenter.addPeer(peerInfo);
+        }
     }
 
 }
