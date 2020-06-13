@@ -31,5 +31,13 @@ public abstract class BaseMsgState {
         this.inputStream = inputStream;
     }
 
+    public BaseMsgState(InputStream dis){
+        this.inputStream = dis;
+    }
+
+    public BaseMsgState(){
+
+    }
+
     public abstract void handle() throws IOException;
 }

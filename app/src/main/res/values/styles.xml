@@ -41,4 +41,9 @@
         <item name="android:dividerHeight">1dp</item>
     </style>
 
+    <style name="fab_labels_style">
+        <item name="android:background">@drawable/bg_account_input</item> //文字背景的样式
+        <item name="android:textColor">@color/black</item> //文字的颜色
+    </style>
+
 </resources>

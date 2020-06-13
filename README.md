@@ -1,3 +1,8 @@
+每次更新GraphQL的schema后运行
+```shell script
+ ./gradlew downloadApolloSchema -Pcom.apollographql.apollo.endpoint=http://49.232.12.147:4000 -Pcom.apollographql.apollo.schema=src/main/graphql/com/example/schema.json
+```
+
 1. 关于注册登录
 
    1. 界面需要改成输入账号和密码，还要新增一个注册页面(输入邮箱，用户名，密码，重复密码)[前端:**刘子明**]

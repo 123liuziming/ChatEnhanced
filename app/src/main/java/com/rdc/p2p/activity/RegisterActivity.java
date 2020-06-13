@@ -2,31 +2,44 @@ package com.rdc.p2p.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.apollographql.apollo.ApolloCall;
+import com.apollographql.apollo.ApolloClient;
+import com.apollographql.apollo.api.Response;
+import com.apollographql.apollo.exception.ApolloException;
+import com.example.RegisterMutation;
 import com.rdc.p2p.R;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class RegisterActivity extends AppCompatActivity {
+    private static final String TAG = "RegisterActivity";
     private String responseData = "";
     private String name = "";
     private static String password = "";
     private EditText email;
     private EditText passwordFirst; // 第一遍密码
     private EditText passwordFirstagain; // 重复密码
-    private Boolean canClickEmail = false;  //Email是否合法
+    private Boolean canClickEmail = true;  //Email是否合法
     private Boolean canClickPassWordSameSame = false;  //密码是否一致
     private Boolean canClickPassWordValid = false;  //密码是否是八到二十位字母和数字的组合
 
-
+    private void showToast(String text) {
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+    }
 
     /**
      * 初始化注册的各组件，需要输入您的email（必须符合格式要求，不然不予注册）
@@ -50,12 +63,58 @@ public class RegisterActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                        startActivity(intent);
+                        RegisterActivity.this.onBackPressed();
+                        // Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                        // startActivity(intent);
                     }
                 }
         );
+        buttonSubmit.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        new check().isRight();
+                        if (canClickEmail && canClickPassWordValid && canClickPassWordSameSame) {
+                            ApolloClient apolloClient = ApolloClient.builder().serverUrl("http://49.232.12.147:4000").build();
+                            final RegisterMutation register = RegisterMutation.builder()
+                                    .username(email.getText().toString())
+                                    .password(passwordFirst.getText().toString())
+                                    .build();
 
+                            apolloClient.mutate(register)
+                                    .enqueue(new ApolloCall.Callback<RegisterMutation.Data>() {
+                                        @Override
+                                        public void onResponse(@NotNull Response<RegisterMutation.Data> response) {
+                                            Log.d(TAG, response.getData().toString());
+                                            if (response.getData().Register() != null) {
+                                                Looper.prepare();
+                                                showToast("注册成功，请点击已有账号登录！");
+                                                Looper.loop();
+                                            } else {
+                                                Looper.prepare();
+                                                showToast("注册失败，可能是账号已经注册过！");
+                                                Looper.loop();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(@NotNull ApolloException e) {
+                                            Log.d(TAG, e.getLocalizedMessage(), e);
+                                            Looper.prepare();
+                                            showToast("注册失败！");
+                                            Looper.loop();
+                                        }
+                                    });
+                        } else if (!canClickEmail) {
+                            showToast("邮箱不合法！");
+                        } else if (!canClickPassWordValid) {
+                            showToast("密码不合法，密码是八到二十位字母和数字的组合！");
+                        } else {
+                            showToast("两次输入的密码不一致！");
+                        }
+                    }
+                }
+        );
 
 
     }
@@ -70,9 +129,7 @@ public class RegisterActivity extends AppCompatActivity {
             String email = RegisterActivity.this.email.getText().toString();
             String password1 = RegisterActivity.this.passwordFirst.getText().toString();
             String password2 = RegisterActivity.this.passwordFirstagain.getText().toString();
-            if (!isEmail(email)) {
-                RegisterActivity.this.canClickEmail = false;
-            } else if (!same(password1, password2) || password1.isEmpty() || password2.isEmpty()) {
+            if (!same(password1, password2) || password1.isEmpty() || password2.isEmpty()) {
                 RegisterActivity.this.canClickEmail = true;
                 RegisterActivity.this.canClickPassWordSameSame = false;
             } else {

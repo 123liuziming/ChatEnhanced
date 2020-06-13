@@ -25,6 +25,8 @@ import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.bean.GroupBean;
 import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.fragment.GroupListFragment;
+import com.rdc.p2p.fragment.FragmentCommon;
+import com.rdc.p2p.fragment.GroupChatFragment;
 import com.rdc.p2p.fragment.PeerListFragment;
 import com.rdc.p2p.fragment.PersonalDetailFragment;
 import com.rdc.p2p.fragment.ScanDeviceFragment;
@@ -155,7 +157,8 @@ public class MainActivity extends BaseActivity {
         mPeerListFragment = new PeerListFragment();
         List<TabViewChild> tabViewChildList = new ArrayList<>();
         TabViewChild tabViewChild01 = new TabViewChild(R.drawable.tab01_sel, R.drawable.tab01_unsel, "聊天", mPeerListFragment);
-        TabViewChild tabViewChild02 = new TabViewChild(R.drawable.tab02_sel, R.drawable.tab02_unsel, "群聊", new GroupListFragment());
+
+        TabViewChild tabViewChild02 = new TabViewChild(R.drawable.tab02_sel, R.drawable.tab02_unsel, "群聊", new GroupChatFragment());
         TabViewChild tabViewChild05 = new TabViewChild(R.drawable.tab05_sel, R.drawable.tab05_unsel, "我的", new PersonalDetailFragment());
         tabViewChildList.add(tabViewChild01);
         tabViewChildList.add(tabViewChild02);

@@ -8,6 +8,8 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.rdc.p2p.Strategy.LatestMessageStrategy;
+import com.rdc.p2p.Strategy.MessageContext;
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseMsgState;
 import com.rdc.p2p.bean.GroupBean;
@@ -22,7 +24,15 @@ import com.rdc.p2p.contract.PeerListContract;
 import com.rdc.p2p.event.LinkGroupSocketResponseEvent;
 import com.rdc.p2p.listener.OnSocketSendCallback;
 import com.rdc.p2p.manager.SocketManager;
+
 import com.rdc.p2p.model.PeerListModel;
+import com.rdc.p2p.state.ReceiveMsgState.EndingReceiveFileState;
+import com.rdc.p2p.state.ReceiveMsgState.ErrorReceiveFileState;
+import com.rdc.p2p.state.ReceiveMsgState.ReceiveMsgContext;
+import com.rdc.p2p.state.ReceiveMsgState.ReceiveMsgExceptionState;
+import com.rdc.p2p.state.ReceiveMsgState.ReceiveMsgNormalState;
+import com.rdc.p2p.state.ReceiveMsgState.ReceivingFileState;
+import com.rdc.p2p.state.ReceiveMsgState.StartReceiveFileState;
 import com.rdc.p2p.state.SendMsgState.FileMsgState;
 import com.rdc.p2p.state.SendMsgState.ImageMsgState;
 import com.rdc.p2p.state.SendMsgState.SendMsgContext;
@@ -236,6 +246,7 @@ public class SocketThread extends Thread {
     public void run() {
         mHandler.sendEmptyMessageDelayed(DESTROY, DELAY_MILLIS);
         MyDnsBean myDnsBean;
+        ReceiveMsgContext context = new ReceiveMsgContext();
         try {
             DataInputStream dis = new DataInputStream(mSocket.getInputStream());
             //循环读取消息
@@ -298,55 +309,19 @@ public class SocketThread extends Thread {
                         mIsFileReceived.set(true);
                         break;
                     case Protocol.TEXT:
-                        Log.d(TAG, "DNS is\n");
-                        for(MyDnsBean m : DataSupport.where("id is not null").find(MyDnsBean.class)) {
-                            Log.d(TAG, m.getmTargetIp() + " " + m.getmTargetName());
-                        }
-                        int textBytesLength = dis.readInt();
-                        byte[] textBytes = new byte[textBytesLength];
-                        dis.readFully(textBytes);
-                        String text = new String(textBytes, "utf-8");
-                        Log.d(TAG, "run: receive text:" + text);
-                        Log.d(TAG, "ip and name is" + mTargetIp + MyDnsUtil.convertUserIp(mTargetIp));
-                        MessageBean textMsg = MessageBean.getInstance(mTargetIp);
-                        textMsg.setUserName(App.getUserBean().getNickName());
-                        textMsg.setUserIp(mTargetIp);
-                        textMsg.setMsgType(Protocol.TEXT);
-                        textMsg.setMine(false);
-                        textMsg.setText(text);
-                        textMsg.getDate();
-                        textMsg.save();
-                        mPresenter.messageReceived(textMsg);
-                        break;
-                    case Protocol.IMAGE:
-                        int size = dis.readInt();
-                        byte[] bytes = new byte[size];
-                        dis.readFully(bytes);
-                        Log.d(TAG, "run: image size = " + size);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, size);
-                        MessageBean imageMsg = MessageBean.getInstance(mTargetIp);
-                        imageMsg.setUserName(App.getUserBean().getNickName());
-                        imageMsg.setUserIp(mTargetIp);
-                        imageMsg.setMine(false);
-                        imageMsg.setMsgType(Protocol.IMAGE);
-                        imageMsg.setImagePath(SDUtil.saveBitmap(bitmap, System.currentTimeMillis() + "", ".jpg"));
-                        imageMsg.getDate();
-                        imageMsg.save();
-                        mPresenter.messageReceived(imageMsg);
+                        state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, Protocol.TEXT);
+                        context.setState(state);
+                        context.request();
                         break;
                     case Protocol.AUDIO:
-                        int audioSize = dis.readInt();
-                        byte[] audioBytes = new byte[audioSize];
-                        dis.readFully(audioBytes);
-                        MessageBean audioMsg = MessageBean.getInstance(mTargetIp);
-                        audioMsg.setUserName(App.getUserBean().getNickName());
-                        audioMsg.setUserIp(mTargetIp);
-                        audioMsg.setMine(false);
-                        audioMsg.setMsgType(Protocol.AUDIO);
-                        audioMsg.setAudioPath(SDUtil.saveAudio(audioBytes, System.currentTimeMillis() + ""));
-                        audioMsg.getDate();
-                        audioMsg.save();
-                        mPresenter.messageReceived(audioMsg);
+                        state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, Protocol.AUDIO);
+                        context.setState(state);
+                        context.request();
+                        break;
+                    case Protocol.IMAGE:
+                        state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, Protocol.IMAGE);
+                        context.setState(state);
+                        context.request();
                         break;
                     case Protocol.FILE:
                         int fileSize = dis.readInt();
@@ -367,19 +342,10 @@ public class SocketThread extends Thread {
                         }
                         File file = SDUtil.getMyAppFile(name, fileType);
                         if (file != null) {
-                            MessageBean fileMsg = MessageBean.getInstance(mTargetIp);
-                            fileMsg.setUserName(App.getUserBean().getNickName());
-                            fileMsg.setFilePath(file.getAbsolutePath());
-                            fileMsg.setFileName(file.getName());
-                            fileMsg.setFileSize(fileSize);
-                            fileMsg.setFileState(FileState.RECEIVE_FILE_START);
-                            fileMsg.setTransmittedSize(0);
-                            fileMsg.setUserIp(mTargetIp);
-                            fileMsg.setMine(false);
-                            fileMsg.setMsgType(Protocol.FILE);
-                            fileMsg.getDate();
-                            fileMsg.save();
-                            mPresenter.fileReceiving(fileMsg);
+                            StartReceiveFileState startReceiveFileState = new StartReceiveFileState(file,mTargetIp,mPresenter,fileSize);
+                            context.setState(startReceiveFileState);
+                            context.request();
+                            MessageBean fileMsg = startReceiveFileState.getFileMsg();
                             FileOutputStream fos = new FileOutputStream(file);
                             int transLen = 0;
                             int countBytes = 0;//计算传输的字节，达到一定数量才更新界面
@@ -389,12 +355,10 @@ public class SocketThread extends Thread {
                                 transLen += read;
                                 countBytes += read;
                                 if (read == -1) {
-                                    Log.d(TAG, "run: read=-1");
-                                    //对方关闭
-                                    fileMsg.setSendStatus(FileState.RECEIVE_FILE_ERROR);
-                                    fileMsg.saveOrUpdate("belongName = ? and filePath = ?", fileMsg.getBelongName(), fileMsg.getFilePath());
+                                    ErrorReceiveFileState errorReceiveFileState = new ErrorReceiveFileState(fileMsg, mPresenter);
+                                    context.setState(errorReceiveFileState);
+                                    context.request();
                                     file.delete();
-                                    mPresenter.fileReceiving(fileMsg);
                                     sendRequest(App.getUserBean(), Protocol.FILE_RECEIVED);
                                     break;
                                 }
@@ -402,21 +366,17 @@ public class SocketThread extends Thread {
                                 if (transLen == fileSize) {
                                     fos.flush();
                                     fos.close();
-                                    fileMsg = fileMsg.clone();
-                                    fileMsg.setTransmittedSize(transLen);
-                                    fileMsg.setFileState(FileState.RECEIVE_FILE_FINISH);
-                                    fileMsg.saveOrUpdate("belongName = ? and filePath = ?", fileMsg.getBelongName(), fileMsg.getFilePath());
-                                    mPresenter.fileReceiving(fileMsg);
+                                    EndingReceiveFileState endingReceiveFileState = new EndingReceiveFileState(fileMsg, transLen, mPresenter);
+                                    context.setState(endingReceiveFileState);
+                                    context.request();
                                     sendRequest(App.getUserBean(), Protocol.FILE_RECEIVED);
                                     break;
                                 }
                                 if (countBytes >= 1024 * 300) {
                                     //每接收到300KB数据就更新一次界面
-                                    fileMsg = fileMsg.clone();
-                                    fileMsg.setTransmittedSize(transLen);
-                                    fileMsg.setFileState(FileState.RECEIVE_FILE_ING);
-                                    fileMsg.saveOrUpdate("belongName = ? and filePath = ?", fileMsg.getBelongName(), fileMsg.getFilePath());
-                                    mPresenter.fileReceiving(fileMsg);
+                                    ReceivingFileState receivingFileState = new ReceivingFileState(fileMsg, mPresenter, transLen);
+                                    context.setState(receivingFileState);
+                                    context.request();
                                     countBytes = 0;
                                 }
                             }
@@ -427,14 +387,13 @@ public class SocketThread extends Thread {
                 }
             }
         } catch (IOException e) {
-            DataSupport.deleteAll(MyDnsBean.class, "mTargetIp = ?", mTargetIp);
-            MyDnsUtil.refresh(mTargetIp);
             e.printStackTrace();
-            if (!mKeepUser) {
-                mPresenter.removePeer(mTargetIp);
+            ReceiveMsgExceptionState eState = new ReceiveMsgExceptionState(mTargetIp, mKeepUser, mPresenter);
+            context.setState(eState);
+            try {
+                context.request();
             }
-            SocketManager.getInstance().removeSocketByIp(mTargetIp);
-            SocketManager.getInstance().removeSocketThreadByIp(mTargetIp);
+            catch (IOException ex) {}// bad code, never would throw an exception
             mHandlerThread.quitSafely();
         }
     }
@@ -456,17 +415,13 @@ public class SocketThread extends Thread {
     }
 
     private void setLatestMsg(List<MessageBean> allMsg, PeerBean peerInfo) {
-        if (allMsg.size() != 0) {
-            MessageBean tmp = Collections.max(allMsg, new Comparator<MessageBean>() {
-                @Override
-                public int compare(MessageBean messageBean, MessageBean t1) {
-                    return messageBean.getDate().compareTo(t1.getDate());
-                }
-            });
-            peerInfo.setRecentMessage(tmp.getText());
+        LatestMessageStrategy strategy = new LatestMessageStrategy();
+        MessageContext context = new MessageContext(strategy);
+        MessageBean latestMsg =  context.executeStrategy(allMsg);
+        if(latestMsg != null) {
+            peerInfo.setRecentMessage(latestMsg.getText());
+            mPresenter.addPeer(peerInfo);
         }
-        mPresenter.addPeer(peerInfo);
-
     }
 
 }

@@ -25,7 +25,8 @@
 
         <activity
             android:name=".activity.RegisterActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait"/>
+
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait" />
@@ -61,6 +62,7 @@
         <activity
             android:name=".activity.AddGroupActivity"
             android:screenOrientation="portrait"/>
+
     </application>
 
 </manifest>

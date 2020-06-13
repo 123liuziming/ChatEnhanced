@@ -83,6 +83,7 @@ import org.litepal.crud.DataSupport;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -236,11 +237,39 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                             @Override
                             public void onResponse(@NotNull Response<MessagesBetweenQuery.Data> response) {
                                 Log.d(TAG, response.getData().toString());
+                                try {
+//                                    ArrayList<MessagesBetweenQuery.MessagesBetween> mock = new ArrayList<>();
+//                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename1", "content1", "sender1", "receiver1", "time1", Protocol.TEXT));
+//                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename2", "content2", "sender2", "receiver2", "time2", Protocol.TEXT));
+//                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename3", "content3", "sender3", "receiver3", "time3", Protocol.TEXT));
+
+                                    runOnUiThread(() -> {
+                                        for (MessagesBetweenQuery.MessagesBetween message : response.getData().MessagesBetween()) { // mock
+                                            MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
+                                            textMsg.setMine(message.sender() == App.getUserBean().getNickName()); // send by me
+                                            textMsg.setMsgType(message.type()); // Protocol.TEXT
+                                            textMsg.setText(message.content()); // getString(mEtInput)
+                                            textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
+                                            mMsgRvAdapter.appendData(textMsg);
+                                        }
+                                    });
+                                    Looper.prepare();
+                                    showToast("拉取了" + response.getData().MessagesBetween().size() + "条信息！");
+                                    Looper.loop();
+                                } catch (NullPointerException e) {
+                                    Log.e(TAG, e.getLocalizedMessage(), e);
+                                    Looper.prepare();
+                                    showToast("拉取失败！");
+                                    Looper.loop();
+                                }
                             }
 
                             @Override
                             public void onFailure(@NotNull ApolloException e) {
-                                Log.d(TAG, e.getLocalizedMessage(), e);
+                                Log.e(TAG, e.getLocalizedMessage(), e);
+                                Looper.prepare();
+                                showToast("拉取失败！");
+                                Looper.loop();
                             }
                         });
 
