@@ -8,8 +8,6 @@ import android.view.View;
 import android.widget.Button;
 
 import com.bumptech.glide.Glide;
-import com.getbase.floatingactionbutton.AddFloatingActionButton;
-import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.rdc.p2p.R;
 import com.rdc.p2p.activity.AddFriendToChat;
 import com.rdc.p2p.activity.LoginActivity;

@@ -158,7 +158,7 @@ public class MainActivity extends BaseActivity {
         List<TabViewChild> tabViewChildList = new ArrayList<>();
         TabViewChild tabViewChild01 = new TabViewChild(R.drawable.tab01_sel, R.drawable.tab01_unsel, "聊天", mPeerListFragment);
 
-        TabViewChild tabViewChild02 = new TabViewChild(R.drawable.tab02_sel, R.drawable.tab02_unsel, "群聊", new GroupChatFragment());
+        TabViewChild tabViewChild02 = new TabViewChild(R.drawable.tab02_sel, R.drawable.tab02_unsel, "群聊", new GroupListFragment());
         TabViewChild tabViewChild05 = new TabViewChild(R.drawable.tab05_sel, R.drawable.tab05_unsel, "我的", new PersonalDetailFragment());
         tabViewChildList.add(tabViewChild01);
         tabViewChildList.add(tabViewChild02);
