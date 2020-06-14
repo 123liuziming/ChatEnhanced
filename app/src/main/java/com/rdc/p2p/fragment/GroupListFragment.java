@@ -135,7 +135,7 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
                 Intent it = new Intent(getActivity(), GroupChatActivity.class);
                 Bundle bundle = new Bundle();
                 //传入需要的参数
-                GroupBean groupBean= mGroupList.get(position);
+                GroupBean groupBean= mGroupListRvAdapter.getDataList().get(position);
                 bundle.putString("title",groupBean.getNickName());
                 it.putExtras(bundle);
                 startActivity(it);
