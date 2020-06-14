@@ -44,7 +44,7 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
     @BindView(R.id.tv_tip_nonePeer_fragment_peer_list)
     TextView mTvTipNonePeer;
 
-    private static GroupListRvAdapter mGroupListRvAdapter;
+    private static GroupListRvAdapter mGroupListRvAdapter = new GroupListRvAdapter();
     private List<GroupBean> mGroupList;
     private Handler mHandler =new Handler(new Handler.Callback() {
         @Override
@@ -118,7 +118,6 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
 
     @Override
     protected void initView() {
-        mGroupListRvAdapter = new GroupListRvAdapter();
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mBaseActivity,DividerItemDecoration.VERTICAL);
         dividerItemDecoration.setDrawable(Objects.requireNonNull(ContextCompat.getDrawable(mBaseActivity, R.drawable.bg_divider)));
         mRvPeerList.addItemDecoration(dividerItemDecoration);

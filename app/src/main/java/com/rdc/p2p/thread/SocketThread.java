@@ -256,6 +256,7 @@ public class SocketThread extends Thread {
                 switch (type) {
                     case Protocol.ADD_GROUP_CHAT_REQUEST:
                         GroupBean groupBean = GsonUtil.gsonToBean(dis.readUTF(), GroupBean.class);
+                        Log.d(TAG,"接收到群聊邀请");
                         EventBus.getDefault().post(new LinkGroupSocketResponseEvent(true,groupBean));
 
                         break;

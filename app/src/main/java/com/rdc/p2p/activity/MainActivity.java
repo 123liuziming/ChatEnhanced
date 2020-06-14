@@ -25,7 +25,9 @@ import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.bean.GroupBean;
+import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.PeerBean;
+import com.rdc.p2p.event.LinkGroupSocketResponseEvent;
 import com.rdc.p2p.fragment.GroupListFragment;
 import com.rdc.p2p.fragment.FragmentCommon;
 import com.rdc.p2p.fragment.GroupChatFragment;
@@ -36,6 +38,10 @@ import com.rdc.p2p.manager.SocketManager;
 import com.rdc.p2p.thread.SocketThread;
 import com.ycl.tabview.library.TabView;
 import com.ycl.tabview.library.TabViewChild;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -124,6 +130,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void initView() {
         initToolbar();
+        EventBus.getDefault().register(this);
 //        ActionBarDrawerToggle mDrawerToggle =
 //                new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.open, R.string.close);
 //        mDrawerToggle.syncState();
@@ -278,6 +285,12 @@ public class MainActivity extends BaseActivity {
                 mExecutor.shutdown();
                 break;
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveGroupChatInvitation(LinkGroupSocketResponseEvent linkGroupSocketResponseEvent){
+        Log.d(TAG,"对群聊邀请作出反应：");
+        GroupListFragment.getGroupListAdapter().addItem(linkGroupSocketResponseEvent.getGroupBean());
     }
 
     @Override
