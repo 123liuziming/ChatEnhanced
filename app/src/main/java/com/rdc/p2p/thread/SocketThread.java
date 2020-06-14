@@ -288,6 +288,15 @@ public class SocketThread extends Thread {
                         String u2 = dis.readUTF();
                         peerInfo = getPeer(u2);
                         // 找到曾经的聊天记录
+                        boolean flag = true;
+                        for(PeerBean p : PeerListModel.peerBeans) {
+                            if(p.getNickName().equals(peerInfo.getNickName())) {
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if(flag)
+                            PeerListModel.peerBeans.add(peerInfo);
                         myDnsBean = new MyDnsBean(peerInfo.getUserIp(), peerInfo.getNickName());
                         myDnsBean.save();
                         Log.d(TAG, "DNS is\n");
