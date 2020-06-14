@@ -257,6 +257,7 @@ public class SocketThread extends Thread {
                     case Protocol.ADD_GROUP_CHAT_REQUEST:
                         GroupBean groupBean = GsonUtil.gsonToBean(dis.readUTF(), GroupBean.class);
                         EventBus.getDefault().post(new LinkGroupSocketResponseEvent(true,groupBean));
+
                         break;
                     case Protocol.DISCONNECT:
                         Log.d(TAG, "Protocol disconnect ! ip=" + mTargetIp);

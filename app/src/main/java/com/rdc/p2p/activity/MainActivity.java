@@ -250,6 +250,8 @@ public class MainActivity extends BaseActivity {
             case 3:
                 String groupJson = data.getStringExtra("groupBean");
                 GroupBean groupBean = new Gson().fromJson(groupJson,GroupBean.class);
+                // 更新视图层
+                GroupListFragment.getGroupListAdapter().addItem(groupBean);
                 ThreadPoolExecutor mExecutor = new ThreadPoolExecutor(1, 255,
                         1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(
                         255));
