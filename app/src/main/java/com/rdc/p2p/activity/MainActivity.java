@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.rdc.p2p.R;
+import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.bean.GroupBean;
@@ -254,6 +256,8 @@ public class MainActivity extends BaseActivity {
                 // 向所有IP地址发送一个
                 for (final PeerBean pb : groupBean.getPeerBeanList()) {
                     Log.d(TAG,"选取的用户为："+pb.getNickName());
+                    if(pb.getNickName().equals(App.getUserBean().getNickName()))
+                        continue;
                     mExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
@@ -261,7 +265,9 @@ public class MainActivity extends BaseActivity {
                             if (socketThread != null) {
                                 socketThread.sendGroupChatRequest(groupBean);
                             } else {
+                                Looper.prepare();
                                 showToast("目标用户连接已断开");
+                                Looper.loop();
                             }
                         }
                     });
