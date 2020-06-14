@@ -43,7 +43,7 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".activity.GroupChatActivity"
+            android:name=".activity.GroupChatDetailActivity"
             android:screenOrientation="portrait" />
 
         <provider

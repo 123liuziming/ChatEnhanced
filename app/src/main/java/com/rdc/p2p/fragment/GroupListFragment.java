@@ -15,9 +15,10 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.rdc.p2p.R;
-import com.rdc.p2p.activity.GroupChatActivity;
+import com.rdc.p2p.activity.GroupChatDetailActivity;
 import com.rdc.p2p.adapter.GroupListRvAdapter;
 import com.rdc.p2p.app.App;
+import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BaseFragment;
 import com.rdc.p2p.bean.GroupBean;
 import com.rdc.p2p.bean.MessageBean;
@@ -131,13 +132,9 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
             @Override
             public void onItemClick(int position) {
                 //这里进入群聊
-                Intent it = new Intent(getActivity(), GroupChatActivity.class);
-                Bundle bundle = new Bundle();
                 //传入需要的参数
                 GroupBean groupBean= mGroupListRvAdapter.getDataList().get(position);
-                bundle.putString("title",groupBean.getNickName());
-                it.putExtras(bundle);
-                startActivity(it);
+                GroupChatDetailActivity.actionStart((BaseActivity) getContext(),groupBean,position);
             }
             @Override
             public boolean onItemLongClick(int position) {

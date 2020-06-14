@@ -19,6 +19,7 @@ import com.rdc.p2p.bean.GroupBean;
 import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.util.ImageUtil;
 
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,39 @@ public class GroupListRvAdapter extends BaseRecyclerViewAdapter<GroupBean>{
             notifyItemChanged(index);
         }
     }
+
+    /**
+     * 更新个Item的Text
+     *
+     * @param text
+     */
+    public GroupBean updateItemText(String text, String peerIp) {
+        int index = getIndexByGroupName(peerIp);
+        if (index != -1) {
+            GroupBean groupBean = getDataList().get(index);
+            groupBean.setRecentMessage(text);
+            notifyItemChanged(index);
+            return groupBean;
+        }
+        return null;
+    }
+
+    /**
+     * 根据IP查询该成员在成员列表中的位置
+     *
+     * @param groupName
+     * @return 成员的位置 ,如果找不到则返回 -1
+     */
+    private int getIndexByGroupName(String groupName) {
+        for (int i = 0; i < mDataList.size(); i++) {
+            if (mDataList.get(i).getNickName().equals(groupName)) {
+                //找到成员的下标
+                return i;
+            }
+        }
+        return -1;
+    }
+
 
 
     @NonNull

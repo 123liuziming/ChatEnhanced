@@ -2,7 +2,6 @@ package com.rdc.p2p.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -25,12 +24,9 @@ import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.bean.GroupBean;
-import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.event.LinkGroupSocketResponseEvent;
 import com.rdc.p2p.fragment.GroupListFragment;
-import com.rdc.p2p.fragment.FragmentCommon;
-import com.rdc.p2p.fragment.GroupChatFragment;
 import com.rdc.p2p.fragment.PeerListFragment;
 import com.rdc.p2p.fragment.PersonalDetailFragment;
 import com.rdc.p2p.fragment.ScanDeviceFragment;
@@ -43,7 +39,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
@@ -72,6 +67,10 @@ public class MainActivity extends BaseActivity {
 //    TextView mTvPeerList;
 //    @BindView(R.id.ll_bottom_right_layout_act_main)
 //    LinearLayout mLlBottomRight;
+
+    public static final int ADD_GROUP_CHAT_ACTIVITY_CODE = 3;
+    public static final int GROUP_CHAT_DETAIL_ACTIVITY_CODE = 4;
+    public static final int CHAT_DETAIL_ACTIVITY_CODE = 1;
 
     private FragmentPagerAdapter mFragmentPagerAdapter;
     private boolean checking = true;// true 选中聊天列表 , false 选中 聊天室
@@ -249,12 +248,12 @@ public class MainActivity extends BaseActivity {
         if(data == null)
             return;
         switch (requestCode) {
-            case 1:
+            case CHAT_DETAIL_ACTIVITY_CODE:
                 if (resultCode == RESULT_OK) {
                     mPeerListFragment.getmPeerListRvAdapter().updateItemText("", data.getStringExtra("ip"));
                 }
                 break;
-            case 3:
+            case ADD_GROUP_CHAT_ACTIVITY_CODE:
                 String groupJson = data.getStringExtra("groupBean");
                 GroupBean groupBean = new Gson().fromJson(groupJson,GroupBean.class);
                 // 更新视图层
@@ -284,11 +283,18 @@ public class MainActivity extends BaseActivity {
                 showToast("邀请已发送");
                 mExecutor.shutdown();
                 break;
+            case GROUP_CHAT_DETAIL_ACTIVITY_CODE:
+                if (resultCode == RESULT_OK) {
+                    // 这里是接收返回的最近消息，在前端进行更改
+                    GroupListFragment.getGroupListAdapter().updateItemText("",data.getStringExtra("groupName"));
+                }
+                break;
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveGroupChatInvitation(LinkGroupSocketResponseEvent linkGroupSocketResponseEvent){
+        // TODO 有个问题，在没有点击群聊之前，GroupListFragment似乎还没有初始化，所以发送的群聊邀请也无法接收
         Log.d(TAG,"对群聊邀请作出反应：");
         GroupListFragment.getGroupListAdapter().addItem(linkGroupSocketResponseEvent.getGroupBean());
     }

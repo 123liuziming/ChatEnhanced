@@ -2,17 +2,19 @@ package com.rdc.p2p.bean;
 
 import android.annotation.SuppressLint;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class GroupBean {
+public class GroupBean implements Serializable {
     private int groupImageId;
     private String nickName;
     private String recentMessage;
     private String time;
     private int msgNum = 0; // 未读消息数量
+    // 这里是一个坑点，如果GroupBean实现了Serializable，其所有的自定义对象也要实现该接口，否则报错
     private List<PeerBean> peerBeanList;
     public GroupBean(){
         peerBeanList= new ArrayList<>();

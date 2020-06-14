@@ -2,10 +2,10 @@ package com.rdc.p2p.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -23,7 +23,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -42,7 +41,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloClient;
@@ -51,31 +49,30 @@ import com.apollographql.apollo.exception.ApolloException;
 import com.example.MessagesBetweenQuery;
 import com.rdc.p2p.R;
 import com.rdc.p2p.adapter.MsgRvAdapter;
-import com.rdc.p2p.adapter.PeerListRvAdapter;
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseActivity;
-import com.rdc.p2p.bean.MyDnsBean;
-import com.rdc.p2p.bean.PeerBean;
-import com.rdc.p2p.config.FileState;
-import com.rdc.p2p.event.LinkSocketRequestEvent;
+import com.rdc.p2p.bean.GroupBean;
 import com.rdc.p2p.bean.MessageBean;
+import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.config.Constant;
+import com.rdc.p2p.config.FileState;
 import com.rdc.p2p.config.Protocol;
 import com.rdc.p2p.contract.ChatDetailContract;
+import com.rdc.p2p.contract.GroupChatDetailContract;
+import com.rdc.p2p.event.LinkSocketRequestEvent;
 import com.rdc.p2p.event.LinkSocketResponseEvent;
 import com.rdc.p2p.event.RecentMsgEvent;
 import com.rdc.p2p.listener.OnItemViewClickListener;
 import com.rdc.p2p.manager.SocketManager;
 import com.rdc.p2p.presenter.ChatDetailPresenter;
+import com.rdc.p2p.presenter.GroupChatDetailPresenter;
 import com.rdc.p2p.util.AudioRecorderUtil;
 import com.rdc.p2p.util.MediaPlayerUtil;
-import com.rdc.p2p.util.MyDnsUtil;
 import com.rdc.p2p.util.ProgressTextUtil;
 import com.rdc.p2p.util.SDUtil;
 import com.rdc.p2p.widget.PlayerSoundView;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Logger;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
@@ -83,25 +80,26 @@ import org.litepal.crud.DataSupport;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 
-public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implements ChatDetailContract.View {
-
-    private static final String TAG = "ChatDetailActivity";
+public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresenter> implements GroupChatDetailContract.View {
+    String TAG = "GroupChatDetialActivity";
+    private static GroupBean groupBean;
+    private Intent it;
     private static final int CHOOSE_PHOTO = 2;
     private static final int TAKE_PHOTO = 3;
     private static final int FILE_MANAGER = 4;
     private static final int SCROLL = -1;//滑动到底部
     private static final int SCROLL_NOW = -3;//立即滚动到底部
     private static final int HIDE_SOFT_INPUT = -2;//隐藏软键盘
+
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
-    @BindView(R.id.tv_title)
+    @BindView(R.id.tv_title_group)
     TextView mTvTitle;
     @BindView(R.id.iv_photo_album_act_chat_detail)
     ImageView mIvPhotoAlbum;
@@ -124,9 +122,6 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
 
     private static int mTargetpos;
     private MsgRvAdapter mMsgRvAdapter;
-    private static String mTargetPeerName;
-    private static String mTargetPeerIp;
-    private static int mTargetPeerImageId;
     private Uri mTakePhotoUri;
     private File mTakePhotoFile;
     private AudioRecorderUtil mAudioRecorderUtil;
@@ -177,18 +172,14 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("peerName", mTargetPeerName);
-        outState.putString("peerIp", mTargetPeerIp);
-        outState.putInt("peerImageId", mTargetPeerImageId);
+        outState.putSerializable("groupBean",groupBean);
     }
 
     // 活动被销毁后重新create时运行
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mTargetPeerName = savedInstanceState.getString("peerName");
-        mTargetPeerIp = savedInstanceState.getString("peerIp");
-        mTargetPeerImageId = savedInstanceState.getInt("peerImageId");
+        groupBean = (GroupBean) savedInstanceState.getSerializable("groupBean");
     }
 
     @Override
@@ -200,12 +191,11 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         super.onDestroy();
     }
 
-    public static void actionStart(BaseActivity context, String peerIp, String peerName, int peerImageId, int position) {
-        mTargetPeerName = peerName;
-        mTargetPeerIp = peerIp;
-        mTargetPeerImageId = peerImageId;
+    public static void actionStart(BaseActivity context, GroupBean targetGroupBean, int position) {
+        // 两个静态单例对象已经被设置，不需要通过Bundle传serializable了
+        groupBean = targetGroupBean;
         mTargetpos = position;
-        context.startActivityForResult(new Intent(context, ChatDetailActivity.class), MainActivity.CHAT_DETAIL_ACTIVITY_CODE);
+        context.startActivityForResult(new Intent(context, GroupChatDetailActivity.class), MainActivity.GROUP_CHAT_DETAIL_ACTIVITY_CODE);
     }
 
 
@@ -215,66 +205,67 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
             case android.R.id.home:
                 onBackPressed(false);
                 break;
-            case R.id.delete_chat:
-                DataSupport.deleteAll(MessageBean.class, "belongName = ?", mTargetPeerName);
-                mMsgRvAdapter.clearData();
-                onBackPressed(true);
-                showToast("已删除");
-                break;
-            case R.id.get_chat:
-                ApolloClient apolloClient = ApolloClient.builder().serverUrl("http://49.232.12.147:4000").build();
-                //apolloClient.query(MessagesBetweenQuery.MessagesBetween);
-                final MessagesBetweenQuery messagesBetween = MessagesBetweenQuery.builder()
-                        .participantA(App.getUserBean().getNickName())
-                        .participantB(mTargetPeerName)
-                        .build();
-
-                Log.d(TAG, "用户A：" + App.getUserBean().getNickName());
-                Log.d(TAG, "用户B：" + mTargetPeerName);
-
-                apolloClient.query(messagesBetween)
-                        .enqueue(new ApolloCall.Callback<MessagesBetweenQuery.Data>() {
-                            @Override
-                            public void onResponse(@NotNull Response<MessagesBetweenQuery.Data> response) {
-                                Log.d(TAG, response.getData().toString());
-                                try {
-//                                    ArrayList<MessagesBetweenQuery.MessagesBetween> mock = new ArrayList<>();
-//                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename1", "content1", "sender1", "receiver1", "time1", Protocol.TEXT));
-//                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename2", "content2", "sender2", "receiver2", "time2", Protocol.TEXT));
-//                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename3", "content3", "sender3", "receiver3", "time3", Protocol.TEXT));
-
-                                    runOnUiThread(() -> {
-                                        for (MessagesBetweenQuery.MessagesBetween message : response.getData().MessagesBetween()) { // mock
-                                            MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
-                                            textMsg.setMine(message.sender() == App.getUserBean().getNickName()); // send by me
-                                            textMsg.setMsgType(message.type()); // Protocol.TEXT
-                                            textMsg.setText(message.content()); // getString(mEtInput)
-                                            textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
-                                            mMsgRvAdapter.appendData(textMsg);
-                                        }
-                                    });
-                                    Looper.prepare();
-                                    showToast("拉取了" + response.getData().MessagesBetween().size() + "条信息！");
-                                    Looper.loop();
-                                } catch (NullPointerException e) {
-                                    Log.e(TAG, e.getLocalizedMessage(), e);
-                                    Looper.prepare();
-                                    showToast("拉取失败！");
-                                    Looper.loop();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(@NotNull ApolloException e) {
-                                Log.e(TAG, e.getLocalizedMessage(), e);
-                                Looper.prepare();
-                                showToast("拉取失败！");
-                                Looper.loop();
-                            }
-                        });
-
-
-                break;
+                // TODO 群聊的聊天记录拉取功能
+//            case R.id.delete_chat:
+//                DataSupport.deleteAll(MessageBean.class, "belongName = ?", mTargetPeerName);
+//                mMsgRvAdapter.clearData();
+//                onBackPressed(true);
+//                showToast("已删除");
+//                break;
+//            case R.id.get_chat:
+//                ApolloClient apolloClient = ApolloClient.builder().serverUrl("http://49.232.12.147:4000").build();
+//                //apolloClient.query(MessagesBetweenQuery.MessagesBetween);
+//                final MessagesBetweenQuery messagesBetween = MessagesBetweenQuery.builder()
+//                        .participantA(App.getUserBean().getNickName())
+//                        .participantB(mTargetPeerName)
+//                        .build();
+//
+//                Log.d(TAG, "用户A：" + App.getUserBean().getNickName());
+//                Log.d(TAG, "用户B：" + mTargetPeerName);
+//
+//                apolloClient.query(messagesBetween)
+//                        .enqueue(new ApolloCall.Callback<MessagesBetweenQuery.Data>() {
+//                            @Override
+//                            public void onResponse(@NotNull Response<MessagesBetweenQuery.Data> response) {
+//                                Log.d(TAG, response.getData().toString());
+//                                try {
+////                                    ArrayList<MessagesBetweenQuery.MessagesBetween> mock = new ArrayList<>();
+////                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename1", "content1", "sender1", "receiver1", "time1", Protocol.TEXT));
+////                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename2", "content2", "sender2", "receiver2", "time2", Protocol.TEXT));
+////                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename3", "content3", "sender3", "receiver3", "time3", Protocol.TEXT));
+//
+//                                    runOnUiThread(() -> {
+//                                        for (MessagesBetweenQuery.MessagesBetween message : response.getData().MessagesBetween()) { // mock
+//                                            MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
+//                                            textMsg.setMine(message.sender() == App.getUserBean().getNickName()); // send by me
+//                                            textMsg.setMsgType(message.type()); // Protocol.TEXT
+//                                            textMsg.setText(message.content()); // getString(mEtInput)
+//                                            textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
+//                                            mMsgRvAdapter.appendData(textMsg);
+//                                        }
+//                                    });
+//                                    Looper.prepare();
+//                                    showToast("拉取了" + response.getData().MessagesBetween().size() + "条信息！");
+//                                    Looper.loop();
+//                                } catch (NullPointerException e) {
+//                                    Log.e(TAG, e.getLocalizedMessage(), e);
+//                                    Looper.prepare();
+//                                    showToast("拉取失败！");
+//                                    Looper.loop();
+//                                }
+//                            }
+//
+//                            @Override
+//                            public void onFailure(@NotNull ApolloException e) {
+//                                Log.e(TAG, e.getLocalizedMessage(), e);
+//                                Looper.prepare();
+//                                showToast("拉取失败！");
+//                                Looper.loop();
+//                            }
+//                        });
+//
+//
+//                break;
             //Response(operation=com.example.MessagesBetweenQuery@38b6340, data=Data{MessagesBetween=null}, errors=null, dependentKeys=[], fromCache=false, extensions={}, executionContext=com.apollographql.apollo.http.OkHttpExecutionContext@fb6c404)
             //D/EGL_emulation: eglMakeCurrent: 0xf5c82540: ver 3 0 (tinfo 0xf5ff8f90)
         }
@@ -284,7 +275,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     public void onBackPressed(boolean flag) {
         if (flag) {
             Intent intent = new Intent();
-            intent.putExtra("ip", mTargetPeerIp);
+            intent.putExtra("groupName", groupBean.getNickName());
             setResult(RESULT_OK, intent);
             finish();
         } else
@@ -309,13 +300,13 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
 
 
     @Override
-    public ChatDetailPresenter getInstance() {
-        return new ChatDetailPresenter(this, mTargetPeerIp);
+    public GroupChatDetailPresenter getInstance() {
+        return new GroupChatDetailPresenter(this, groupBean);
     }
 
     @Override
     protected int setLayoutResID() {
-        return R.layout.activity_chat_detail;
+        return R.layout.activity_group_chat_detail;
     }
 
     @Override
@@ -328,13 +319,17 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     @Override
     protected void initView() {
         initToolbar();
-        mTvTitle.setText(mTargetPeerName);
-        mMsgRvAdapter = new MsgRvAdapter(mTargetPeerImageId);
+        it = getIntent();
+        initTitle();
+        mTvTitle.setText(groupBean.getNickName());
+        // TODO MsgAdapter的用户头像需要新的适配器
+        mMsgRvAdapter = new MsgRvAdapter(1);
         LinearLayoutManager mLLManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRvMsgList.setLayoutManager(mLLManager);
         mRvMsgList.setAdapter(mMsgRvAdapter);
         mRvMsgList.getItemAnimator().setChangeDuration(0);
-        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ?", mTargetPeerName, App.getUserBean().getNickName()).find(MessageBean.class);
+        // TODO 如果利用群聊名称进行区分，则不能和用户名重复
+        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ?", groupBean.getNickName(), App.getUserBean().getNickName()).find(MessageBean.class);
         mMsgRvAdapter.appendData(mRvMsgBeanList);
         mHandler.sendEmptyMessage(SCROLL_NOW);
         View view = View.inflate(this, R.layout.popupwindow_micorphone, null);
@@ -361,13 +356,13 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     }
                 }
                 String currentImagePath = mMsgRvAdapter.getDataList().get(position).getImagePath();
-                PhotoActivity.actionStart(ChatDetailActivity.this, list, list.indexOf(currentImagePath));
+                PhotoActivity.actionStart(GroupChatDetailActivity.this, list, list.indexOf(currentImagePath));
             }
 
             @SuppressLint("ResourceType")
             @Override
             public void onTextLongClick(final int position, View view) {
-                PopupMenu popupMenu = new PopupMenu(ChatDetailActivity.this, view);
+                PopupMenu popupMenu = new PopupMenu(GroupChatDetailActivity.this, view);
                 popupMenu.getMenuInflater().inflate(R.menu.copy_menu, popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
@@ -413,7 +408,8 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
 
             @Override
             public void onAlterClick(int position) {
-                if (SocketManager.getInstance().isClosedSocket(mTargetPeerIp)) {
+                // TODO 不确定PeerBeanList的position是否是目标
+                if (SocketManager.getInstance().isClosedSocket(groupBean.getPeerBeanList().get(position).getUserIp())) {
                     linkSocket();
                     showToast("连接Socket中");
                 } else {
@@ -445,15 +441,19 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
             @Override
             public void onClick(View view) {
                 if (!TextUtils.isEmpty(getString(mEtInput))) {
-                    MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
+                    // 延迟构建，因为要对所有成员群发
+                    MessageBean textMsg = MessageBean.getInstance("groupMembersIp",groupBean.getNickName());
                     textMsg.setMine(true);
                     textMsg.setMsgType(Protocol.TEXT);
                     textMsg.setText(getString(mEtInput));
                     textMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(textMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
-                    EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp));
+                    for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                        textMsg.setUserIp(peerBean.getUserIp());
+                        presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
+                        EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), peerBean.getUserIp()));
+                    }
                     mEtInput.setText("");
                 }
             }
@@ -469,8 +469,8 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mIvTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (ContextCompat.checkSelfPermission(ChatDetailActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(ChatDetailActivity.this,
+                if (ContextCompat.checkSelfPermission(GroupChatDetailActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(GroupChatDetailActivity.this,
                             new String[]{android.Manifest.permission.CAMERA}, 2);
                 } else {
                     openCamera();
@@ -488,9 +488,9 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     mMediaPlayerUtil.stopPlayer();
                 }
                 //判断权限
-                if (ContextCompat.checkSelfPermission(ChatDetailActivity.this,
+                if (ContextCompat.checkSelfPermission(GroupChatDetailActivity.this,
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(ChatDetailActivity.this,
+                    ActivityCompat.requestPermissions(GroupChatDetailActivity.this,
                             new String[]{Manifest.permission.RECORD_AUDIO}, 3);
                 } else {
                     //有权限
@@ -528,15 +528,18 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
             @Override
             public void onStop(String audioPath) {
                 //录音结束，自动发送音频消息
-                MessageBean audioMsg = MessageBean.getInstance(mTargetPeerIp);
+                MessageBean audioMsg = MessageBean.getInstance("groupMembersIp",groupBean.getNickName());
                 audioMsg.setMine(true);
                 audioMsg.setMsgType(Protocol.AUDIO);
                 audioMsg.setAudioPath(audioPath);
                 audioMsg.setSendStatus(Constant.SEND_MSG_ING);
                 mMsgRvAdapter.appendData(audioMsg);
                 mHandler.sendEmptyMessage(SCROLL_NOW);
-                EventBus.getDefault().post(new RecentMsgEvent("语音", mTargetPeerIp));
-                presenter.sendMsg(audioMsg, mMsgRvAdapter.getItemCount() - 1);
+                for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                    audioMsg.setUserIp(peerBean.getUserIp());
+                    EventBus.getDefault().post(new RecentMsgEvent("语音", peerBean.getUserIp()));
+                    presenter.sendMsg(audioMsg, mMsgRvAdapter.getItemCount() - 1);
+                }
             }
         });
         mTvPressedStartRecord.setOnTouchListener(new View.OnTouchListener() {
@@ -596,47 +599,55 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         switch (requestCode) {
             case CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    String imagePath = SDUtil.getFilePathByUri(ChatDetailActivity.this, data.getData());
-                    MessageBean imageMsg = MessageBean.getInstance(mTargetPeerIp);
+                    String imagePath = SDUtil.getFilePathByUri(GroupChatDetailActivity.this, data.getData());
+                    MessageBean imageMsg = MessageBean.getInstance("mTargetPeerIp",groupBean.getNickName());
                     imageMsg.setMine(true);
                     imageMsg.setMsgType(Protocol.IMAGE);
                     imageMsg.setImagePath(imagePath);
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp));
-                    presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
+                    for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                        imageMsg.setUserIp(peerBean.getUserIp());
+                        EventBus.getDefault().post(new RecentMsgEvent("图片", peerBean.getUserIp()));
+                        presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
+                    }
                 }
                 break;
             case TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    MessageBean imageMsg = MessageBean.getInstance(mTargetPeerIp);
+                    MessageBean imageMsg = MessageBean.getInstance("mTargetPeerIp",groupBean.getNickName());
                     imageMsg.setMine(true);
                     imageMsg.setMsgType(Protocol.IMAGE);
                     imageMsg.setImagePath(mTakePhotoFile.getAbsolutePath());
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp));
-                    presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
+                    for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                        imageMsg.setUserIp(peerBean.getUserIp());
+                        EventBus.getDefault().post(new RecentMsgEvent("图片", peerBean.getUserIp()));
+                        presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
+                    }
                 }
                 break;
             case FILE_MANAGER:
                 if (resultCode == RESULT_OK) {
                     isSendingFile = true;
-                    MessageBean fileMsg = MessageBean.getInstance(mTargetPeerIp);
+                    MessageBean fileMsg = MessageBean.getInstance("mTargetPeerIp",groupBean.getNickName());
                     fileMsg.setMine(true);
                     fileMsg.setMsgType(Protocol.FILE);
-                    fileMsg.setUserIp(mTargetPeerIp);//这里得设置为对方ip，否则在本窗口下 void iv_take_photo_act_chat_detail_group(MessageBean messageBean) 会丢弃此消息
-                    fileMsg.setFilePath(SDUtil.getFilePathByUri(ChatDetailActivity.this, data.getData()));
+                    fileMsg.setFilePath(SDUtil.getFilePathByUri(GroupChatDetailActivity.this, data.getData()));
                     fileMsg.setFileName(SDUtil.checkFileName(mMsgRvAdapter.getFileNameList(), fileMsg.getFilePath()));
                     fileMsg.setFileSize(SDUtil.getFileByteSize(fileMsg.getFilePath()));
                     fileMsg.setTransmittedSize(0);
                     fileMsg.setFileState(FileState.SEND_FILE_ING);
                     mMsgRvAdapter.appendData(fileMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("文件", mTargetPeerIp));
-                    presenter.sendMsg(fileMsg, mMsgRvAdapter.getItemCount() - 1);
+                    for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                        fileMsg.setUserIp(peerBean.getUserIp());//这里得设置为对方ip，否则在本窗口下 void receiveMessage(MessageBean messageBean) 会丢弃此消息
+                        EventBus.getDefault().post(new RecentMsgEvent("文件", peerBean.getUserIp()));
+                        presenter.sendMsg(fileMsg, mMsgRvAdapter.getItemCount() - 1);
+                    }
                 }
                 break;
         }
@@ -668,19 +679,13 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
             }
         }
         if (Build.VERSION.SDK_INT >= 24) {
-            mTakePhotoUri = FileProvider.getUriForFile(ChatDetailActivity.this, "com.rdc.p2p.fileprovider", mTakePhotoFile);
+            mTakePhotoUri = FileProvider.getUriForFile(GroupChatDetailActivity.this, "com.rdc.p2p.fileprovider", mTakePhotoFile);
         } else {
             mTakePhotoUri = Uri.fromFile(mTakePhotoFile);
         }
         Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mTakePhotoUri);
         startActivityForResult(intent, TAKE_PHOTO);
-    }
-
-    @Override
-    public void linkSocket() {
-        LinkSocketRequestEvent linkSocketRequestEvent = new LinkSocketRequestEvent(mTargetPeerIp);
-        EventBus.getDefault().post(linkSocketRequestEvent);
     }
 
     @Override
@@ -757,13 +762,17 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mToolbar.setTitle("");
     }
 
+    /**
+     * 因为有两个recieve所以需要分开
+     * @param messageBean
+     */
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void receiveMessage(MessageBean messageBean) {
-        // TODO 先用一个最简单粗暴的方法测试，后续需要一个新的事件
-        if(messageBean.isGroupMessage()){
+    public void receiveGroupMessage(MessageBean messageBean) {
+        Log.d(TAG,"当前接收群聊消息名称为："+messageBean.getGroupName());
+        if(!messageBean.isGroupMessage()){
             return;
         }
-        if (messageBean.getUserIp().equals(mTargetPeerIp)) {
+        if (messageBean.getGroupName().equals(groupBean.getNickName())) {
             if (messageBean.getMsgType() == Protocol.FILE) {
                 if (messageBean.getFileState() == FileState.RECEIVE_FILE_START) {
                     //文件传输的第一次消息传到，要添加到列表并且自动滚动
@@ -786,15 +795,31 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         }
     }
 
+    // 不知道群聊需不需要这个
+    @Override
+    public void linkSocket() {
+        // TODO linkSocket的理解
+        LinkSocketRequestEvent linkSocketRequestEvent = new LinkSocketRequestEvent(groupBean.getPeerBeanList().get(0).getUserIp());
+        EventBus.getDefault().post(linkSocketRequestEvent);
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void linkSocketResponse(LinkSocketResponseEvent responseEvent) {
         PeerBean peerBean = responseEvent.getPeerBean();
-        if (peerBean.getUserIp().equals(mTargetPeerIp)) {
-            if (responseEvent.isState()) {
-                mTargetPeerImageId = peerBean.getUserImageId();
-                mTargetPeerName = peerBean.getNickName();
-            }
-            presenter.setLinkSocketState(responseEvent.isState());
-        }
+//        if (peerBean.getUserIp().equals(mTargetPeerIp)) {
+//            if (responseEvent.isState()) {
+//                mTargetPeerImageId = peerBean.getUserImageId();
+//                mTargetPeerName = peerBean.getNickName();
+//            }
+//            presenter.setLinkSocketState(responseEvent.isState());
+//        }
+    }
+
+    protected void initTitle(){
+        //设置标题
+//        Bundle bundle = it.getExtras();
+//        groupBean = (GroupBean) bundle.getSerializable("groupBean");
+        TextView title = findViewById(R.id.tv_title_group);
+        title.setText(groupBean.getNickName());
     }
 }

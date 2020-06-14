@@ -13,6 +13,7 @@ import java.util.Date;
  * Created by Lin Yaotian on 2018/5/16.
  */
 public class MessageBean extends DataSupport implements Cloneable {
+    private String groupName;
     private String userName;
     private String belongName;
     private String userIp;//消息发送方IP
@@ -42,12 +43,27 @@ public class MessageBean extends DataSupport implements Cloneable {
         this.belongName = belongName;
     }
 
+    private MessageBean(String belongIp, String belongName, String groupName) {
+        this.belongIp = belongIp;
+        this.belongName = belongName;
+        this.groupName = groupName;
+    }
+
     public static MessageBean getInstance(String belongIp) {
         // 静态工厂模式联合享元模式
         String belongName = MyDnsUtil.convertUserIp(belongIp);
         return new MessageBean(belongIp, belongName);
     }
 
+    public static MessageBean getInstance(String belongIp,String groupName) {
+        // 静态工厂模式联合享元模式
+        String belongName = MyDnsUtil.convertUserIp(belongIp);
+        return new MessageBean(belongIp, belongName, groupName);
+    }
+
+    public Boolean isGroupMessage(){
+        return groupName != null;
+    }
 
 
     @Override
@@ -87,6 +103,14 @@ public class MessageBean extends DataSupport implements Cloneable {
                 ", isMine=" + isMine +
                 ", sendStatus=" + sendStatus +
                 '}';
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
     public String getBelongName() {
