@@ -25,7 +25,7 @@
 
         <activity
             android:name=".activity.RegisterActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.MainActivity"
             android:screenOrientation="portrait" />
@@ -42,9 +42,10 @@
             android:name=".activity.ChatDetailActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activity.GroupChatActivity">
-            android:screenOrientation="portrait"
-        </activity>
+        <activity
+            android:name=".activity.GroupChatActivity"
+            android:screenOrientation="portrait" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.rdc.p2p.fileprovider"
@@ -60,7 +61,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.AddGroupActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
     </application>
 
