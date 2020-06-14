@@ -30,8 +30,6 @@ import java.util.Collection;
 import butterknife.BindView;
 
 public class GroupChatFragment extends BaseFragment {
-    @BindView(R.id.fab_action_a)
-    FloatingActionButton btn_create;
     @Override
     protected int setLayoutResourceId() {
         return R.layout.fragment_group_chat;
@@ -59,13 +57,6 @@ public class GroupChatFragment extends BaseFragment {
     }
     @Override
     protected void setListener() {
-        btn_create.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent_Add = new Intent();
-                intent_Add.setClass(mBaseActivity, AddFriendToChat.class);
-                startActivity(intent_Add);
-            }
-        });
+
     }
 }
