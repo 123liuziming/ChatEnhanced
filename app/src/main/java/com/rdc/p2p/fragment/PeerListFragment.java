@@ -142,7 +142,8 @@ public class PeerListFragment extends BaseFragment<PeerListPresenter> implements
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void updateRecentMsg(RecentMsgEvent recentMsgEvent){
-       mPeerListRvAdapter.updateItemText(recentMsgEvent.getText(),recentMsgEvent.getTargetIp());
+        if(!recentMsgEvent.isGroup())
+            mPeerListRvAdapter.updateItemText(recentMsgEvent.getText(),recentMsgEvent.getTargetIp());
        // mPeerListRvAdapter.addItemBadge(recentMsgEvent.getTargetIp());
     }
 

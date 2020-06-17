@@ -61,6 +61,7 @@ import com.rdc.p2p.contract.ChatDetailContract;
 import com.rdc.p2p.contract.GroupChatDetailContract;
 import com.rdc.p2p.event.LinkSocketRequestEvent;
 import com.rdc.p2p.event.LinkSocketResponseEvent;
+import com.rdc.p2p.event.RecentGroupMsgEvent;
 import com.rdc.p2p.event.RecentMsgEvent;
 import com.rdc.p2p.listener.OnItemViewClickListener;
 import com.rdc.p2p.manager.SocketManager;
@@ -457,8 +458,8 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                             continue;
                         textMsg.setUserIp(peerBean.getUserIp());
                         presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
-                        EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), peerBean.getUserIp()));
                     }
+                    EventBus.getDefault().postSticky(new RecentGroupMsgEvent(getString(mEtInput), groupBean.getNickName()));
                     mEtInput.setText("");
                 }
             }
@@ -542,7 +543,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                 mHandler.sendEmptyMessage(SCROLL_NOW);
                 for (PeerBean peerBean:groupBean.getPeerBeanList()) {
                     audioMsg.setUserIp(peerBean.getUserIp());
-                    EventBus.getDefault().post(new RecentMsgEvent("语音", peerBean.getUserIp()));
+                    EventBus.getDefault().post(new RecentGroupMsgEvent("语音", groupBean.getNickName()));
                     presenter.sendMsg(audioMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
             }
@@ -614,7 +615,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     for (PeerBean peerBean:groupBean.getPeerBeanList()) {
                         imageMsg.setUserIp(peerBean.getUserIp());
-                        EventBus.getDefault().post(new RecentMsgEvent("图片", peerBean.getUserIp()));
+                        EventBus.getDefault().post(new RecentGroupMsgEvent("图片", groupBean.getNickName()));
                         presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                     }
                 }
@@ -630,7 +631,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     for (PeerBean peerBean:groupBean.getPeerBeanList()) {
                         imageMsg.setUserIp(peerBean.getUserIp());
-                        EventBus.getDefault().post(new RecentMsgEvent("图片", peerBean.getUserIp()));
+                        EventBus.getDefault().post(new RecentGroupMsgEvent("图片", groupBean.getNickName()));
                         presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                     }
                 }
@@ -650,7 +651,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     for (PeerBean peerBean:groupBean.getPeerBeanList()) {
                         fileMsg.setUserIp(peerBean.getUserIp());//这里得设置为对方ip，否则在本窗口下 void receiveMessage(MessageBean messageBean) 会丢弃此消息
-                        EventBus.getDefault().post(new RecentMsgEvent("文件", peerBean.getUserIp()));
+                        EventBus.getDefault().post(new RecentGroupMsgEvent("文件", groupBean.getNickName()));
                         presenter.sendMsg(fileMsg, mMsgRvAdapter.getItemCount() - 1);
                     }
                 }

@@ -7,10 +7,33 @@ public class RecentMsgEvent {
 
     private String text;
     private String targetIp;
+    // 是否是群聊消息
+    private boolean isGroup;
+    private String groupName;
 
-    public RecentMsgEvent(String text,String targetIp){
+    public RecentMsgEvent(String text,String targetIp, boolean isGroup){
         this.text = text;
         this.targetIp = targetIp;
+        this.isGroup = isGroup;
+    }
+
+    public RecentMsgEvent(String text,String targetIp, boolean isGroup, String groupName){
+        this.text = text;
+        this.targetIp = targetIp;
+        this.isGroup = isGroup;
+        this.groupName = groupName;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public boolean isGroup() {
+        return isGroup;
+    }
+
+    public void setGroup(boolean group) {
+        isGroup = group;
     }
 
     public String getTargetIp() {

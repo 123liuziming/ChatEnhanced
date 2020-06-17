@@ -25,6 +25,8 @@ import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.bean.UserBean;
 import com.rdc.p2p.contract.GroupListContract;
+import com.rdc.p2p.event.RecentGroupMsgEvent;
+import com.rdc.p2p.event.RecentMsgEvent;
 import com.rdc.p2p.listener.OnClickRecyclerViewListener;
 import com.rdc.p2p.manager.SocketManager;
 import com.rdc.p2p.presenter.GroupListPresenter;
@@ -32,6 +34,8 @@ import com.rdc.p2p.presenter.ScanDevicePresenter;
 import com.rdc.p2p.thread.SocketThread;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +86,7 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
         super.onActivityCreated(savedInstanceState);
         //Log.d(TAG,"size:"+mGroupList.size());
         updateGroupList(mGroupList);
+        EventBus.getDefault().register(this);
         SocketManager manager = SocketManager.getInstance();
         mPresenter = getInstance();
         mPresenter.attachView(this);
@@ -123,6 +128,12 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
         mRvPeerList.addItemDecoration(dividerItemDecoration);
         mRvPeerList.setLayoutManager(new LinearLayoutManager(mBaseActivity, LinearLayoutManager.VERTICAL, false));
         mRvPeerList.setAdapter(mGroupListRvAdapter);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void updateRecentGroupMsg(RecentGroupMsgEvent recentMsgEvent){
+        mGroupListRvAdapter.updateItemText(recentMsgEvent.getText(),recentMsgEvent.getGroupName());
+        // mPeerListRvAdapter.addItemBadge(recentMsgEvent.getTargetIp());
     }
 
     @Override

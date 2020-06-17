@@ -286,7 +286,7 @@ public class SocketThread extends Thread {
                         for(MyDnsBean m : DataSupport.where("id is not null").find(MyDnsBean.class)) {
                             Log.d(TAG, m.getmTargetIp() + " " + m.getmTargetName());
                         }
-                        List<MessageBean> allMessage = DataSupport.where("belongName = ? and userName = ?",peerInfo.getNickName(), App.getUserBean().getNickName()).find(MessageBean.class);
+                        List<MessageBean> allMessage = DataSupport.where("belongName = ? and userName = ? and isGroupMsg = ?",peerInfo.getNickName(), App.getUserBean().getNickName(), "0").find(MessageBean.class);
                         setLatestMsg(allMessage, peerInfo);
                         //回复连接响应
                         sendRequest(App.getUserBean(), Protocol.CONNECT_RESPONSE);
@@ -311,7 +311,7 @@ public class SocketThread extends Thread {
                         for(MyDnsBean m : DataSupport.where("id is not null").find(MyDnsBean.class)) {
                             Log.d(TAG, m.getmTargetIp() + " " + m.getmTargetName());
                         }
-                        allMessage = DataSupport.where("belongName = ? and userName = ?",peerInfo.getNickName(), App.getUserBean().getNickName()).find(MessageBean.class);
+                        allMessage = DataSupport.where("belongName = ? and userName = ? and isGroupMsg = ?",peerInfo.getNickName(), App.getUserBean().getNickName(), "0").find(MessageBean.class);
                         setLatestMsg(allMessage, peerInfo);
                         break;
                     case Protocol.KEEP_USER_RESPONSE:

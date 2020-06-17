@@ -334,7 +334,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mRvMsgList.setLayoutManager(mLLManager);
         mRvMsgList.setAdapter(mMsgRvAdapter);
         mRvMsgList.getItemAnimator().setChangeDuration(0);
-        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ?", mTargetPeerName, App.getUserBean().getNickName()).find(MessageBean.class);
+        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ? and isGroupMsg = ?", mTargetPeerName, App.getUserBean().getNickName(), "0").find(MessageBean.class);
         mMsgRvAdapter.appendData(mRvMsgBeanList);
         mHandler.sendEmptyMessage(SCROLL_NOW);
         View view = View.inflate(this, R.layout.popupwindow_micorphone, null);
@@ -453,7 +453,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     mMsgRvAdapter.appendData(textMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
-                    EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp));
+                    EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp, false));
                     mEtInput.setText("");
                 }
             }
@@ -535,7 +535,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 audioMsg.setSendStatus(Constant.SEND_MSG_ING);
                 mMsgRvAdapter.appendData(audioMsg);
                 mHandler.sendEmptyMessage(SCROLL_NOW);
-                EventBus.getDefault().post(new RecentMsgEvent("语音", mTargetPeerIp));
+                EventBus.getDefault().post(new RecentMsgEvent("语音", mTargetPeerIp, false));
                 presenter.sendMsg(audioMsg, mMsgRvAdapter.getItemCount() - 1);
             }
         });
@@ -604,7 +604,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp));
+                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp, false));
                     presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
                 break;
@@ -617,7 +617,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp));
+                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp, false));
                     presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
                 break;
@@ -635,7 +635,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     fileMsg.setFileState(FileState.SEND_FILE_ING);
                     mMsgRvAdapter.appendData(fileMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("文件", mTargetPeerIp));
+                    EventBus.getDefault().post(new RecentMsgEvent("文件", mTargetPeerIp, false));
                     presenter.sendMsg(fileMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
                 break;
