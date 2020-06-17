@@ -9,6 +9,7 @@ import com.rdc.p2p.base.BaseMsgState;
 import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.bean.MyDnsBean;
 import com.rdc.p2p.config.Protocol;
+import com.rdc.p2p.contract.GroupListContract;
 import com.rdc.p2p.contract.PeerListContract;
 import com.rdc.p2p.util.MyDnsUtil;
 import com.rdc.p2p.util.SDUtil;
@@ -25,14 +26,15 @@ public class ReceiveMsgNormalState extends BaseMsgState {
 
     private String mTargetIp;
     private PeerListContract.Presenter mPresenter;
+    private GroupListContract.Presenter mGroupPresenter;
     private int type;
 
-    public ReceiveMsgNormalState(InputStream dis, String mTargetIp, PeerListContract.Presenter mPresenter, int type){
+    public ReceiveMsgNormalState(InputStream dis, String mTargetIp, PeerListContract.Presenter mPresenter, GroupListContract.Presenter mGroupPresenter, int type){
         super(dis);
         this.mPresenter = mPresenter;
         this.mTargetIp = mTargetIp;
         this.type = type;
-
+        this.mGroupPresenter = mGroupPresenter;
     }
 
     @Override
@@ -42,11 +44,22 @@ public class ReceiveMsgNormalState extends BaseMsgState {
             Log.d(TAG, m.getmTargetIp() + " " + m.getmTargetName());
         }
         DataInputStream dis = new DataInputStream(inputStream);
+        boolean isGroup =dis.readBoolean();
+        String groupName = "";
+        int groupNameLen = 0;
+        if(isGroup) {
+            groupNameLen = dis.readInt();
+            byte[] groupNameBytes = new byte[groupNameLen];
+            dis.readFully(groupNameBytes);
+            groupName = new String(groupNameBytes, "utf-8");
+        }
         int bytesLength = dis.readInt();
         byte[] dataBytes = new byte[bytesLength];
         dis.readFully(dataBytes);
         Log.d(TAG, "ip and name is" + mTargetIp + MyDnsUtil.convertUserIp(mTargetIp));
         MessageBean msgBean = MessageBean.getInstance(mTargetIp);
+        if(isGroup)
+            msgBean.setGroupName(groupName);
         msgBean.setUserName(App.getUserBean().getNickName());
         msgBean.setUserIp(mTargetIp);
         msgBean.setMine(false);
@@ -56,6 +69,7 @@ public class ReceiveMsgNormalState extends BaseMsgState {
                 Log.d(TAG, "run: receive text:" + msg);
                 msgBean.setMsgType(Protocol.TEXT);
                 msgBean.setText(msg);
+                msgBean.setGroupMsg(isGroup);
                 break;
             case Protocol.AUDIO:
                 msgBean.setMsgType(Protocol.AUDIO);
@@ -71,6 +85,10 @@ public class ReceiveMsgNormalState extends BaseMsgState {
         }
         msgBean.getDate();
         msgBean.save();
-        mPresenter.messageReceived(msgBean);
+        if(!msgBean.isGroupMessage())
+            mPresenter.messageReceived(msgBean);
+        else
+            mGroupPresenter.messageReceived(msgBean);
+
     }
 }

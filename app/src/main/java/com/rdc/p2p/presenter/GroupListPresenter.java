@@ -1,12 +1,15 @@
 package com.rdc.p2p.presenter;
 
 import android.app.Activity;
+import android.widget.Toast;
 
 import com.rdc.p2p.base.BasePresenter;
 import com.rdc.p2p.bean.GroupBean;
 import com.rdc.p2p.bean.MessageBean;
 import com.rdc.p2p.contract.GroupListContract;
+import com.rdc.p2p.manager.SocketManager;
 import com.rdc.p2p.model.GroupListModel;
+import com.rdc.p2p.thread.SocketThread;
 
 import java.util.List;
 

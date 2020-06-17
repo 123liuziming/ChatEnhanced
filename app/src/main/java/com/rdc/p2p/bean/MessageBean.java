@@ -14,6 +14,7 @@ import java.util.Date;
  */
 public class MessageBean extends DataSupport implements Cloneable {
     private String groupName;
+    private boolean isGroupMsg; // 标识是否是群发的消息
     private String userName;
     private String belongName;
     private String userIp;//消息发送方IP
@@ -43,6 +44,14 @@ public class MessageBean extends DataSupport implements Cloneable {
         this.belongName = belongName;
     }
 
+    public boolean isGroupMsg() {
+        return isGroupMsg;
+    }
+
+    public void setGroupMsg(boolean groupMsg) {
+        isGroupMsg = groupMsg;
+    }
+
     private MessageBean(String belongIp, String belongName, String groupName) {
         this.belongIp = belongIp;
         this.belongName = belongName;
@@ -61,8 +70,8 @@ public class MessageBean extends DataSupport implements Cloneable {
         return new MessageBean(belongIp, belongName, groupName);
     }
 
-    public Boolean isGroupMessage(){
-        return groupName != null;
+    public boolean isGroupMessage(){
+        return isGroupMsg;
     }
 
 

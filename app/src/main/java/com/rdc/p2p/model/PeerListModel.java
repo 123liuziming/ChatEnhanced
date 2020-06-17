@@ -81,7 +81,7 @@ public class PeerListModel implements PeerListContract.Model {
                         Log.d(TAG, "接收到一个socket连接,ip:" + ip);
                         SocketManager socketManager = SocketManager.getInstance();
                         if (socketManager.isClosedSocket(ip)){
-                            SocketThread socketThread = new SocketThread(socket,mPresenter);
+                            SocketThread socketThread = new SocketThread(socket,mPresenter, null);
                             socketManager.addSocket(ip, socket);
                             socketManager.addSocketThread(ip,socketThread);
                             mExecutor.execute(socketThread);
@@ -160,7 +160,7 @@ public class PeerListModel implements PeerListContract.Model {
         SocketManager socketManager = SocketManager.getInstance();
         SocketThread socketThread;
         if (socketManager.isClosedSocket(targetIp)){
-            socketThread = new SocketThread(socket,mPresenter);
+            socketThread = new SocketThread(socket,mPresenter, null);
             socketManager.addSocket(targetIp, socket);
             socketManager.addSocketThread(targetIp,socketThread);
             mExecutor.execute(socketThread);

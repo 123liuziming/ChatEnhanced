@@ -329,7 +329,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
         mRvMsgList.setAdapter(mMsgRvAdapter);
         mRvMsgList.getItemAnimator().setChangeDuration(0);
         // TODO 如果利用群聊名称进行区分，则不能和用户名重复
-        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ?", groupBean.getNickName(), App.getUserBean().getNickName()).find(MessageBean.class);
+        List<MessageBean> mRvMsgBeanList = DataSupport.where("groupName = ?", groupBean.getNickName()).find(MessageBean.class);
         mMsgRvAdapter.appendData(mRvMsgBeanList);
         mHandler.sendEmptyMessage(SCROLL_NOW);
         View view = View.inflate(this, R.layout.popupwindow_micorphone, null);
@@ -447,9 +447,14 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                     textMsg.setMsgType(Protocol.TEXT);
                     textMsg.setText(getString(mEtInput));
                     textMsg.setSendStatus(Constant.SEND_MSG_ING);
+                    // 设置此消息为群聊消息
+                    textMsg.setGroupMsg(true);
+                    textMsg.setGroupName(groupBean.getNickName());
                     mMsgRvAdapter.appendData(textMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                        if(peerBean.getUserIp().equals(App.getMyIP()))
+                            continue;
                         textMsg.setUserIp(peerBean.getUserIp());
                         presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
                         EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), peerBean.getUserIp()));
@@ -769,7 +774,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveGroupMessage(MessageBean messageBean) {
         Log.d(TAG,"当前接收群聊消息名称为："+messageBean.getGroupName());
-        if(!messageBean.isGroupMessage()){
+        if(!messageBean.isGroupMsg()){
             return;
         }
         if (messageBean.getGroupName().equals(groupBean.getNickName())) {

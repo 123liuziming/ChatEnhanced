@@ -168,15 +168,7 @@ public class GroupListModel implements GroupListContract.Model {
 
     @Override
     public void disconnect() {
-        try {
-            mServerSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            isInitServerSocket.set(false);
-            SocketManager.getInstance().destroy();
-            mExecutor.shutdownNow();
-        }
+
     }
 
     @Override

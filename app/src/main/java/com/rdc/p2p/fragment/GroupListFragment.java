@@ -26,7 +26,10 @@ import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.bean.UserBean;
 import com.rdc.p2p.contract.GroupListContract;
 import com.rdc.p2p.listener.OnClickRecyclerViewListener;
+import com.rdc.p2p.manager.SocketManager;
 import com.rdc.p2p.presenter.GroupListPresenter;
+import com.rdc.p2p.presenter.ScanDevicePresenter;
+import com.rdc.p2p.thread.SocketThread;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -47,10 +50,10 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
 
     private static GroupListRvAdapter mGroupListRvAdapter = new GroupListRvAdapter();
     private List<GroupBean> mGroupList;
-    private Handler mHandler =new Handler(new Handler.Callback() {
+    private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            switch (message.what){
+            switch (message.what) {
                 case INIT_SERVER_SOCKET:
                     mPresenter.initSocket();
                     break;
@@ -58,14 +61,17 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
             return true;
         }
     });
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
 
     }
+
     @Override
     protected int setLayoutResourceId() {
         return R.layout.fragment_group_chat;
     }
+
     @Override
     protected GroupListPresenter getInstance() {
         return new GroupListPresenter(mBaseActivity);
@@ -74,21 +80,27 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(TAG,"size:"+mGroupList.size());
+        //Log.d(TAG,"size:"+mGroupList.size());
         updateGroupList(mGroupList);
+        SocketManager manager = SocketManager.getInstance();
+        mPresenter = getInstance();
+        mPresenter.attachView(this);
+        for (SocketThread s : manager.getSocketThreads()) {
+            s.setmGroupPresenter(mPresenter);
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         EventBus.getDefault().unregister(this);
-        if (mPresenter != null){
+        if (mPresenter != null) {
             mPresenter.disconnect();
         }
     }
 
 
-    public boolean isServerSocketConnected(){
+    public boolean isServerSocketConnected() {
         return mPresenter.isServerSocketConnected();
     }
 
@@ -96,20 +108,6 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
     @Override
     protected void initData(Bundle bundle) {
         mGroupList = new ArrayList<>();
-        PeerBean testBean= new PeerBean();
-        UserBean userBean= App.getUserBean();
-        testBean.setUserImageId(userBean.getUserImageId());
-        testBean.setNickName(userBean.getNickName());
-        testBean.setUserIp(App.getMyIP());
-        GroupBean groupBean= new GroupBean();
-        groupBean.getPeerBeanList().add(testBean);
-        groupBean.getPeerBeanList().add(testBean);
-        groupBean.getPeerBeanList().add(testBean);
-        groupBean.getPeerBeanList().add(testBean);
-        groupBean.setNickName("testGroup");
-        groupBean.setGroupImageId(userBean.getUserImageId());
-        groupBean.setRecentMessage("这是测试群聊");
-        mGroupList.add(groupBean);
     }
 
     public static GroupListRvAdapter getGroupListAdapter() {
@@ -117,12 +115,13 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
     }
 
 
+
     @Override
     protected void initView() {
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mBaseActivity,DividerItemDecoration.VERTICAL);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mBaseActivity, DividerItemDecoration.VERTICAL);
         dividerItemDecoration.setDrawable(Objects.requireNonNull(ContextCompat.getDrawable(mBaseActivity, R.drawable.bg_divider)));
         mRvPeerList.addItemDecoration(dividerItemDecoration);
-        mRvPeerList.setLayoutManager(new LinearLayoutManager(mBaseActivity,LinearLayoutManager.VERTICAL,false));
+        mRvPeerList.setLayoutManager(new LinearLayoutManager(mBaseActivity, LinearLayoutManager.VERTICAL, false));
         mRvPeerList.setAdapter(mGroupListRvAdapter);
     }
 
@@ -133,9 +132,12 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
             public void onItemClick(int position) {
                 //这里进入群聊
                 //传入需要的参数
-                GroupBean groupBean= mGroupListRvAdapter.getDataList().get(position);
-                GroupChatDetailActivity.actionStart((BaseActivity) getContext(),groupBean,position);
+                GroupBean groupBean = mGroupListRvAdapter.getDataList().get(position);
+                GroupChatDetailActivity.actionStart((BaseActivity) getContext(), groupBean, position);
+                mGroupListRvAdapter.clearItemBadge(position);
+
             }
+
             @Override
             public boolean onItemLongClick(int position) {
                 return false;
@@ -146,22 +148,26 @@ public class GroupListFragment extends BaseFragment<GroupListPresenter> implemen
 
     @Override
     public void updateGroupList(List<GroupBean> list) {
-        if (list.size() == 0){
-            mRvPeerList.setVisibility(View.GONE);
-            mTvTipNonePeer.setVisibility(View.VISIBLE);
-        }else {
-            mRvPeerList.setVisibility(View.VISIBLE);
-            mTvTipNonePeer.setVisibility(View.GONE);
-            mGroupListRvAdapter.updateData(list);
-        }
+        mRvPeerList.setVisibility(View.VISIBLE);
+        mTvTipNonePeer.setVisibility(View.GONE);
+        mGroupListRvAdapter.updateData(list);
+
     }
 
     @Override
     public void messageReceived(MessageBean messageBean) {
+        GroupBean bean = mGroupListRvAdapter.updateItemText(messageBean.getText(),messageBean.getGroupName());
+        bean= mGroupListRvAdapter.addItemBadge(messageBean.getGroupName());
+        if (bean == null){
+            showToast("收到成员列表以外的消息！");
+        }else {
+            EventBus.getDefault().post(messageBean);
+        }
     }
 
     @Override
     public void fileReceiving(MessageBean messageBean) {
+
     }
 
     @Override

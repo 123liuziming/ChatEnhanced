@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.rdc.p2p.R;
+import com.rdc.p2p.adapter.GroupListRvAdapter;
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseActivity;
 import com.rdc.p2p.base.BasePresenter;
@@ -296,7 +297,11 @@ public class MainActivity extends BaseActivity {
     public void receiveGroupChatInvitation(LinkGroupSocketResponseEvent linkGroupSocketResponseEvent){
         // TODO 有个问题，在没有点击群聊之前，GroupListFragment似乎还没有初始化，所以发送的群聊邀请也无法接收
         Log.d(TAG,"对群聊邀请作出反应：");
-        GroupListFragment.getGroupListAdapter().addItem(linkGroupSocketResponseEvent.getGroupBean());
+        GroupListRvAdapter adapter = GroupListFragment.getGroupListAdapter();
+        GroupBean bean = linkGroupSocketResponseEvent.getGroupBean();
+        if(!adapter.isExistsGroup(bean.getNickName()))
+            adapter.addItem(bean);
+
     }
 
     @Override

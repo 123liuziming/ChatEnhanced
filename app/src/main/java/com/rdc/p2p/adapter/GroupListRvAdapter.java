@@ -40,6 +40,14 @@ public class GroupListRvAdapter extends BaseRecyclerViewAdapter<GroupBean>{
         notifyItemRangeChanged(mDataList.size() - 1, 1);
     }
 
+    public boolean isExistsGroup(String groupName) {
+        for(GroupBean g : mDataList) {
+            if(g.getNickName().equals(groupName))
+                return true;
+        }
+        return false;
+    }
+
     public void clearItemBadge(int index) {
         if (index != -1) {
             GroupBean group = getDataList().get(index);
@@ -53,8 +61,8 @@ public class GroupListRvAdapter extends BaseRecyclerViewAdapter<GroupBean>{
      *
      * @param text
      */
-    public GroupBean updateItemText(String text, String peerIp) {
-        int index = getIndexByGroupName(peerIp);
+    public GroupBean updateItemText(String text, String groupName) {
+        int index = getIndexByGroupName(groupName);
         if (index != -1) {
             GroupBean groupBean = getDataList().get(index);
             groupBean.setRecentMessage(text);
@@ -78,6 +86,17 @@ public class GroupListRvAdapter extends BaseRecyclerViewAdapter<GroupBean>{
             }
         }
         return -1;
+    }
+
+    public GroupBean addItemBadge(String groupName) {
+        int index = getIndexByGroupName(groupName);
+        if (index != -1) {
+            GroupBean bean = getDataList().get(index);
+            bean.setMsgNum(bean.getMsgNum() + 1);
+            notifyItemChanged(index);
+            return bean;
+        }
+        return null;
     }
 
 

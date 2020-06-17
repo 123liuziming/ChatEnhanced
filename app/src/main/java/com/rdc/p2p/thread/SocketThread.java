@@ -20,6 +20,7 @@ import com.rdc.p2p.bean.UserBean;
 import com.rdc.p2p.config.Constant;
 import com.rdc.p2p.config.FileState;
 import com.rdc.p2p.config.Protocol;
+import com.rdc.p2p.contract.GroupListContract;
 import com.rdc.p2p.contract.PeerListContract;
 import com.rdc.p2p.event.LinkGroupSocketResponseEvent;
 import com.rdc.p2p.listener.OnSocketSendCallback;
@@ -70,6 +71,7 @@ public class SocketThread extends Thread {
     public PeerBean peer;
     private Socket mSocket;
     private PeerListContract.Presenter mPresenter;
+    private GroupListContract.Presenter mGroupPresenter;
     private String mTargetIp;
     private boolean mTimeOutNeedDestroy;//超过 DELAY_MILLIS 时间没有进行通信，则把Socket连接关闭，但界面上仍然显示
     private Handler mHandler;
@@ -81,12 +83,17 @@ public class SocketThread extends Thread {
     private BaseMsgState state;
 
 
-    public SocketThread(Socket mSocket, PeerListContract.Presenter mPresenter) {
+    public void setmGroupPresenter(GroupListContract.Presenter mGroupPresenter) {
+        this.mGroupPresenter = mGroupPresenter;
+    }
+
+    public SocketThread(Socket mSocket, PeerListContract.Presenter mPresenter, GroupListContract.Presenter mGroupPresenter) {
         mTargetIp = mSocket.getInetAddress().getHostAddress();
         mTimeOutNeedDestroy = true;
         mKeepUser = false;
         this.mSocket = mSocket;
         this.mPresenter = mPresenter;
+        this.mGroupPresenter = mGroupPresenter;
         peer = null;
         mIsFileReceived = new AtomicBoolean(true);
         mHandlerThread = new HandlerThread("HandlerThread");
@@ -258,7 +265,6 @@ public class SocketThread extends Thread {
                         GroupBean groupBean = GsonUtil.gsonToBean(dis.readUTF(), GroupBean.class);
                         Log.d(TAG,"接收到群聊邀请");
                         EventBus.getDefault().post(new LinkGroupSocketResponseEvent(true,groupBean));
-
                         break;
                     case Protocol.DISCONNECT:
                         Log.d(TAG, "Protocol disconnect ! ip=" + mTargetIp);
@@ -320,17 +326,17 @@ public class SocketThread extends Thread {
                         mIsFileReceived.set(true);
                         break;
                     case Protocol.TEXT:
-                        state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, Protocol.TEXT);
+                        state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, mGroupPresenter, Protocol.TEXT);
                         context.setState(state);
                         context.request();
                         break;
                     case Protocol.AUDIO:
-                        state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, Protocol.AUDIO);
+                        state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, mGroupPresenter, Protocol.AUDIO);
                         context.setState(state);
                         context.request();
                         break;
                     case Protocol.IMAGE:
-                        state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, Protocol.IMAGE);
+                        state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, mGroupPresenter, Protocol.IMAGE);
                         context.setState(state);
                         context.request();
                         break;
