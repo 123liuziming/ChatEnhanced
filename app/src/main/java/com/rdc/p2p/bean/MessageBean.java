@@ -64,10 +64,10 @@ public class MessageBean extends DataSupport implements Cloneable {
         return new MessageBean(belongIp, belongName);
     }
 
-    public static MessageBean getInstance(String belongIp,String groupName) {
+    public static MessageBean getGroupInstance(String groupName) {
         // 静态工厂模式联合享元模式
-        String belongName = MyDnsUtil.convertUserIp(belongIp);
-        return new MessageBean(belongIp, belongName, groupName);
+        // 群聊延迟构架，暂时不添加用户名，在循环中再索引用户名
+        return new MessageBean("", groupName);
     }
 
     public boolean isGroupMessage(){

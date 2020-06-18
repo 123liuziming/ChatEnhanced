@@ -24,6 +24,14 @@ public class AudioMsgState extends BaseMsgState {
     @Override
     public void handle() throws IOException {
         DataOutputStream dos = new DataOutputStream(outputStream);
+        // 发消息时标识此消息是否是群聊消息
+        dos.writeBoolean(messageBean.isGroupMessage());
+        // 如果是群聊消息，写入群聊名称
+        if(messageBean.isGroupMessage()) {
+            byte[] groupNameBytes = messageBean.getGroupName().getBytes();
+            dos.writeInt(groupNameBytes.length);
+            dos.write(groupNameBytes);
+        }
         int audioSize = inputStream.available();
         dos.writeInt(audioSize);
         byte[] audioBytes = new byte[audioSize];

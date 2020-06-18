@@ -80,6 +80,7 @@ public class ReceiveMsgNormalState extends BaseMsgState {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(dataBytes, 0, bytesLength);
                 Log.d(TAG, "run: image size = " + bytesLength);
                 msgBean.setMsgType(Protocol.IMAGE);
+                msgBean.setGroupMsg(isGroup);
                 msgBean.setImagePath(SDUtil.saveBitmap(bitmap, System.currentTimeMillis() + "", ".jpg"));
                 break;
         }

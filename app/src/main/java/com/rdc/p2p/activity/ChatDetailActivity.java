@@ -780,6 +780,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 }
             } else {
                 //其他消息直接添加到数据源中并更新RecyclerView界面
+                Log.d(TAG, "receiveMessage: 接收到个人聊天其他信息");
                 mMsgRvAdapter.appendData(messageBean);
                 mHandler.sendEmptyMessage(SCROLL);
             }

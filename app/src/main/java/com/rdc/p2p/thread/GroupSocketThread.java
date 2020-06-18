@@ -281,6 +281,7 @@ public class GroupSocketThread extends Thread{
                         mPresenter.messageReceived(textMsg);
                         break;
                     case Protocol.IMAGE:
+                        Log.d(TAG,"GroupSocket接收到图片");
                         int size = dis.readInt();
                         byte[] bytes = new byte[size];
                         dis.readFully(bytes);

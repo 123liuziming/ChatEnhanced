@@ -443,7 +443,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
             public void onClick(View view) {
                 if (!TextUtils.isEmpty(getString(mEtInput))) {
                     // 延迟构建，因为要对所有成员群发
-                    MessageBean textMsg = MessageBean.getInstance("groupMembersIp",groupBean.getNickName());
+                    MessageBean textMsg = MessageBean.getGroupInstance(groupBean.getNickName());
                     textMsg.setMine(true);
                     textMsg.setMsgType(Protocol.TEXT);
                     textMsg.setText(getString(mEtInput));
@@ -454,7 +454,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                     mMsgRvAdapter.appendData(textMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     for (PeerBean peerBean:groupBean.getPeerBeanList()) {
-                        if(peerBean.getUserIp().equals(App.getMyIP()))
+                        if(peerBean.getNickName().equals(App.getUserBean().getNickName()))
                             continue;
                         textMsg.setUserIp(peerBean.getUserIp());
                         presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
@@ -534,7 +534,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
             @Override
             public void onStop(String audioPath) {
                 //录音结束，自动发送音频消息
-                MessageBean audioMsg = MessageBean.getInstance("groupMembersIp",groupBean.getNickName());
+                MessageBean audioMsg = MessageBean.getGroupInstance(groupBean.getNickName());
                 audioMsg.setMine(true);
                 audioMsg.setMsgType(Protocol.AUDIO);
                 audioMsg.setAudioPath(audioPath);
@@ -606,23 +606,30 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
             case CHOOSE_PHOTO:
                 if (resultCode == RESULT_OK) {
                     String imagePath = SDUtil.getFilePathByUri(GroupChatDetailActivity.this, data.getData());
-                    MessageBean imageMsg = MessageBean.getInstance("mTargetPeerIp",groupBean.getNickName());
+                    MessageBean imageMsg = MessageBean.getGroupInstance(groupBean.getNickName());
                     imageMsg.setMine(true);
                     imageMsg.setMsgType(Protocol.IMAGE);
                     imageMsg.setImagePath(imagePath);
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
+                    // 设置此消息为群聊消息
+                    imageMsg.setGroupMsg(true);
+                    imageMsg.setGroupName(groupBean.getNickName());
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                        if(peerBean.getNickName().equals(App.getUserBean().getNickName())){
+                            continue;
+                        }
+                        Log.d(TAG,"群聊发送图片，发送目标为："+peerBean.getNickName());
                         imageMsg.setUserIp(peerBean.getUserIp());
-                        EventBus.getDefault().post(new RecentGroupMsgEvent("图片", groupBean.getNickName()));
                         presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                     }
+                    EventBus.getDefault().post(new RecentGroupMsgEvent("图片", groupBean.getNickName()));
                 }
                 break;
             case TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    MessageBean imageMsg = MessageBean.getInstance("mTargetPeerIp",groupBean.getNickName());
+                    MessageBean imageMsg = MessageBean.getGroupInstance(groupBean.getNickName());
                     imageMsg.setMine(true);
                     imageMsg.setMsgType(Protocol.IMAGE);
                     imageMsg.setImagePath(mTakePhotoFile.getAbsolutePath());
@@ -639,7 +646,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
             case FILE_MANAGER:
                 if (resultCode == RESULT_OK) {
                     isSendingFile = true;
-                    MessageBean fileMsg = MessageBean.getInstance("mTargetPeerIp",groupBean.getNickName());
+                    MessageBean fileMsg = MessageBean.getGroupInstance(groupBean.getNickName());
                     fileMsg.setMine(true);
                     fileMsg.setMsgType(Protocol.FILE);
                     fileMsg.setFilePath(SDUtil.getFilePathByUri(GroupChatDetailActivity.this, data.getData()));
@@ -795,6 +802,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                 }
             } else {
                 //其他消息直接添加到数据源中并更新RecyclerView界面
+                Log.d(TAG, "receiveGroupMessage: 接收到群聊其他信息");
                 mMsgRvAdapter.appendData(messageBean);
                 mHandler.sendEmptyMessage(SCROLL);
             }

@@ -94,6 +94,9 @@ public class GroupChatDetailModel implements GroupChatDetailContract.Model {
                     for (SocketThread socketThread:threadList) {
                         if (socketThread != null) {
                             socketThread.sendMsg(msg, position);
+                            if(msg.getMsgType() == Protocol.IMAGE){
+                                Log.d(TAG,"图片文件被发送");
+                            }
                         } else {
                             mIsLinkedSocket.set(false);
                             if (msg.getMsgType() == Protocol.FILE) {

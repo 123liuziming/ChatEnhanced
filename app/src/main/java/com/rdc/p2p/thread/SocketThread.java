@@ -326,6 +326,7 @@ public class SocketThread extends Thread {
                         mIsFileReceived.set(true);
                         break;
                     case Protocol.TEXT:
+                        Log.d(TAG,"接收到文字消息");
                         state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, mGroupPresenter, Protocol.TEXT);
                         context.setState(state);
                         context.request();
@@ -336,6 +337,7 @@ public class SocketThread extends Thread {
                         context.request();
                         break;
                     case Protocol.IMAGE:
+                        Log.d(TAG,"Socket接收到图片");
                         state = new ReceiveMsgNormalState(dis, mTargetIp, mPresenter, mGroupPresenter, Protocol.IMAGE);
                         context.setState(state);
                         context.request();
