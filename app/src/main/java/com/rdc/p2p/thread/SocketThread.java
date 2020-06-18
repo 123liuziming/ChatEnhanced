@@ -343,6 +343,15 @@ public class SocketThread extends Thread {
                         context.request();
                         break;
                     case Protocol.FILE:
+                        boolean isGroup =dis.readBoolean();
+                        String groupName = "";
+                        int groupNameLen = 0;
+                        if(isGroup) {
+                            groupNameLen = dis.readInt();
+                            byte[] groupNameBytes = new byte[groupNameLen];
+                            dis.readFully(groupNameBytes);
+                            groupName = new String(groupNameBytes, "utf-8");
+                        }
                         int fileSize = dis.readInt();
                         String fileName = dis.readUTF();//文件名，包括了文件类型(e.g: pic.jpg)
                         Log.d(TAG, "run: 接收到一个文件=" + fileName);
@@ -365,6 +374,10 @@ public class SocketThread extends Thread {
                             context.setState(startReceiveFileState);
                             context.request();
                             MessageBean fileMsg = startReceiveFileState.getFileMsg();
+                            if(isGroup) {
+                                fileMsg.setGroupName(groupName);
+                                fileMsg.setGroupMsg(true);
+                            }
                             FileOutputStream fos = new FileOutputStream(file);
                             int transLen = 0;
                             int countBytes = 0;//计算传输的字节，达到一定数量才更新界面
