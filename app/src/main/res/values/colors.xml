@@ -17,4 +17,5 @@
     <color name="bg_login_state_normal">#006BD8</color>
     <color name="bg_login_state_pressed">#0167cf</color>
     <color name="little_gray">#DCDCDC</color>
+    <color name="littler_gray">#EDECEC</color>
 </resources>

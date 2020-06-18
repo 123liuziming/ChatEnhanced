@@ -5,21 +5,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/little_gray">
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/layout_toolbar"
+    android:background="@color/white">
+
+    <ImageView
+        android:id="@+id/mImage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="250dp"
+        android:scaleType="centerCrop"
+        tools:ignore="MissingConstraints" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/user_image_detail"
         android:layout_width="139dp"
         android:layout_height="202dp"
-        android:layout_marginTop="88dp"
+        android:layout_marginTop="70dp"
         android:src="@drawable/iv_0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -39,58 +38,82 @@
         android:theme="@style/TextInputLayoutTheme"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_image_detail">
-
-        <TextView
-            android:id="@+id/name_data"
+        app:layout_constraintTop_toBottomOf="@+id/user_image_detail"
+        xmlns:cardView="http://schemas.android.com/apk/res-auto"
+        >
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@drawable/bg_account_input"
-            android:gravity="center_vertical"
-            android:hint="显示姓名"
-            android:maxLength="40"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:singleLine="true"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_size_normal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/name_data"
-            tools:ignore="TextFields" />
-
-        <TextView
-            android:id="@+id/ip_data"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            cardView:cardCornerRadius="10dp"
+            cardView:cardElevation="10dp"
+            cardView:cardMaxElevation="10dp">
+            <TextView
+                android:id="@+id/name_data"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:background="@drawable/bg_account_input"
+                android:gravity="center_vertical"
+                android:hint="显示姓名"
+                android:maxLength="40"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:singleLine="true"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_size_normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/name_data"
+                tools:ignore="TextFields" />
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@drawable/bg_account_input"
-            android:gravity="center_vertical"
-            android:maxLength="40"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:singleLine="true"
-            android:layout_marginTop="10dp"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_size_normal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/name_data"
-            tools:ignore="TextFields" />
-
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            cardView:cardCornerRadius="10dp"
+            cardView:cardMaxElevation="10dp"
+            cardView:cardElevation="10dp">
+            <TextView
+                android:id="@+id/ip_data"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:background="@drawable/bg_account_input"
+                android:gravity="center_vertical"
+                android:maxLength="40"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:singleLine="true"
+                android:textColor="@color/black"
+                android:textSize="@dimen/text_size_normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/name_data"
+                tools:ignore="TextFields" />
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="20dp"
+            cardView:cardCornerRadius="10dp"
+            cardView:cardMaxElevation="10dp"
+            cardView:cardElevation="10dp">
             <Button
                 android:id="@+id/btn_return"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="45dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/name_data"
                 android:layout_gravity="center"
-                android:layout_marginTop="50dp"
                 android:background="@drawable/bg_state_login"
                 android:text="退出"
                 android:textColor="@color/color_Accent"
                 android:textSize="@dimen/text_size_normal"
                 tools:ignore="MissingConstraints" />
+        </android.support.v7.widget.CardView>
 
 
     </android.support.design.widget.TextInputLayout>

@@ -3,12 +3,18 @@ package com.rdc.p2p.fragment;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -31,10 +37,12 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import butterknife.BindView;
 import de.hdodenhof.circleimageview.CircleImageView;
+
 
 public class PersonalDetailFragment extends BaseFragment {
     private static final String TAG ="PersonDetailFragment";
@@ -50,6 +58,9 @@ public class PersonalDetailFragment extends BaseFragment {
 
     @BindView(R.id.ip_data)
     TextView ipData;
+
+    @BindView(R.id.mImage)
+    ImageView mImage;
 
     @Override
     protected int setLayoutResourceId() {
@@ -79,7 +90,15 @@ public class PersonalDetailFragment extends BaseFragment {
         nameData.setText("用户名: " + App.getUserBean().getNickName());
         ipData.setText("本次登录IP: " + App.getMyIP());
         Glide.with(this).load(ImageUtil.getImageResId(App.getUserBean().getUserImageId())).into(mCivUserImage);
+        Bitmap sampleImg = BitmapFactory.decodeResource(getResources(), ImageUtil.getImageResId(App.getUserBean().getUserImageId()));
+        sampleImg = blur(sampleImg,14);
+        mImage.setImageBitmap(sampleImg);
+        //        Glide.with(this)
+//                .load(ImageUtil.getImageResId(App.getUserBean().getUserImageId()))
+//
+//                .into(mImage);
     }
+
 
     @Override
     protected void setListener() {
@@ -111,5 +130,21 @@ public class PersonalDetailFragment extends BaseFragment {
             }
         });
     }
+
+    private Bitmap blur(Bitmap bitmap, float radius) {
+        Bitmap output = Bitmap.createBitmap(bitmap); // 创建输出图片
+        RenderScript rs = RenderScript.create(getContext()); // 构建一个RenderScript对象
+        ScriptIntrinsicBlur gaussianBlue = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs)); //
+        // 创建高斯模糊脚本
+        Allocation allIn = Allocation.createFromBitmap(rs, bitmap); // 开辟输入内存
+        Allocation allOut = Allocation.createFromBitmap(rs, output); // 开辟输出内存
+        gaussianBlue.setRadius(radius); // 设置模糊半径，范围0f<radius<=25f
+        gaussianBlue.setInput(allIn); // 设置输入内存
+        gaussianBlue.forEach(allOut); // 模糊编码，并将内存填入输出内存
+        allOut.copyTo(output); // 将输出内存编码为Bitmap，图片大小必须注意
+        rs.destroy(); // 关闭RenderScript对象，API>=23则使用rs.releaseAllContexts()
+        return output;
+    }
+
 
 }
