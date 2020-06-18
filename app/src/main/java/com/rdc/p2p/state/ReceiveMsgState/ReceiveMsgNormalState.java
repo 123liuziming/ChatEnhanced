@@ -74,6 +74,7 @@ public class ReceiveMsgNormalState extends BaseMsgState {
             case Protocol.AUDIO:
                 msgBean.setMsgType(Protocol.AUDIO);
                 Log.d(TAG, "run: audio size = " + bytesLength);
+                msgBean.setGroupMsg(isGroup);
                 msgBean.setAudioPath(SDUtil.saveAudio(dataBytes, System.currentTimeMillis() + ""));
                 break;
             case Protocol.IMAGE:

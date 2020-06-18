@@ -539,13 +539,19 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                 audioMsg.setMsgType(Protocol.AUDIO);
                 audioMsg.setAudioPath(audioPath);
                 audioMsg.setSendStatus(Constant.SEND_MSG_ING);
+                // 设置此消息为群聊消息
+                audioMsg.setGroupMsg(true);
+                audioMsg.setGroupName(groupBean.getNickName());
                 mMsgRvAdapter.appendData(audioMsg);
                 mHandler.sendEmptyMessage(SCROLL_NOW);
                 for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                    if(peerBean.getNickName().equals(App.getUserBean().getNickName())){
+                        continue;
+                    }
                     audioMsg.setUserIp(peerBean.getUserIp());
-                    EventBus.getDefault().post(new RecentGroupMsgEvent("语音", groupBean.getNickName()));
                     presenter.sendMsg(audioMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
+                EventBus.getDefault().post(new RecentGroupMsgEvent("语音", groupBean.getNickName()));
             }
         });
         mTvPressedStartRecord.setOnTouchListener(new View.OnTouchListener() {
@@ -620,7 +626,6 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                         if(peerBean.getNickName().equals(App.getUserBean().getNickName())){
                             continue;
                         }
-                        Log.d(TAG,"群聊发送图片，发送目标为："+peerBean.getNickName());
                         imageMsg.setUserIp(peerBean.getUserIp());
                         presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                     }
@@ -634,13 +639,19 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                     imageMsg.setMsgType(Protocol.IMAGE);
                     imageMsg.setImagePath(mTakePhotoFile.getAbsolutePath());
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
+                    // 设置此消息为群聊消息
+                    imageMsg.setGroupMsg(true);
+                    imageMsg.setGroupName(groupBean.getNickName());
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                        if(peerBean.getNickName().equals(App.getUserBean().getNickName())){
+                            continue;
+                        }
                         imageMsg.setUserIp(peerBean.getUserIp());
-                        EventBus.getDefault().post(new RecentGroupMsgEvent("图片", groupBean.getNickName()));
                         presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                     }
+                    EventBus.getDefault().post(new RecentGroupMsgEvent("图片", groupBean.getNickName()));
                 }
                 break;
             case FILE_MANAGER:
@@ -654,13 +665,19 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                     fileMsg.setFileSize(SDUtil.getFileByteSize(fileMsg.getFilePath()));
                     fileMsg.setTransmittedSize(0);
                     fileMsg.setFileState(FileState.SEND_FILE_ING);
+                    // 设置此消息为群聊消息
+                    fileMsg.setGroupMsg(true);
+                    fileMsg.setGroupName(groupBean.getNickName());
                     mMsgRvAdapter.appendData(fileMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+                        if(peerBean.getNickName().equals(App.getUserBean().getNickName())){
+                            continue;
+                        }
                         fileMsg.setUserIp(peerBean.getUserIp());//这里得设置为对方ip，否则在本窗口下 void receiveMessage(MessageBean messageBean) 会丢弃此消息
-                        EventBus.getDefault().post(new RecentGroupMsgEvent("文件", groupBean.getNickName()));
                         presenter.sendMsg(fileMsg, mMsgRvAdapter.getItemCount() - 1);
                     }
+                    EventBus.getDefault().post(new RecentGroupMsgEvent("文件", groupBean.getNickName()));
                 }
                 break;
         }
