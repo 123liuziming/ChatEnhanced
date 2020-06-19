@@ -17,10 +17,12 @@ import com.rdc.p2p.R;
 import com.rdc.p2p.app.App;
 import com.rdc.p2p.base.BaseRecyclerViewAdapter;
 import com.rdc.p2p.bean.MessageBean;
+import com.rdc.p2p.bean.PeerBean;
 import com.rdc.p2p.config.Constant;
 import com.rdc.p2p.config.FileState;
 import com.rdc.p2p.config.Protocol;
 import com.rdc.p2p.listener.OnItemViewClickListener;
+import com.rdc.p2p.model.PeerListModel;
 import com.rdc.p2p.util.ImageUtil;
 import com.rdc.p2p.util.SDUtil;
 import com.rdc.p2p.util.ScreenUtil;
@@ -281,9 +283,21 @@ public class MsgRvAdapter extends BaseRecyclerViewAdapter<MessageBean> {
 
         @Override
         protected void bindView(final MessageBean messageBean) {
-            Glide.with(itemView.getContext())
-                    .load(ImageUtil.getImageResId(mTargetPeerImageId))
-                    .into(mCivLeftHeadImage);
+            if(messageBean.isGroupMsg()){
+                for(PeerBean peerBean:PeerListModel.peerBeans){
+                    if(peerBean.getNickName().equals(messageBean.getUserName())){
+                        Glide.with(itemView.getContext())
+                                .load(ImageUtil.getImageResId(peerBean.getUserImageId()))
+                                .into(mCivLeftHeadImage);
+                        break;
+                    }
+                }
+            }else {
+                Glide.with(itemView.getContext())
+                        .load(ImageUtil.getImageResId(mTargetPeerImageId))
+                        .into(mCivLeftHeadImage);
+            }
+
             if (mOnItemViewClickListener != null) {
                 mLlRightAudio.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -352,9 +366,21 @@ public class MsgRvAdapter extends BaseRecyclerViewAdapter<MessageBean> {
 
         @Override
         protected void bindView(MessageBean messageBean) {
-            Glide.with(itemView.getContext())
-                    .load(ImageUtil.getImageResId(mTargetPeerImageId))
-                    .into(mCivLeftHeadImage);
+            if(messageBean.isGroupMsg()){
+                for(PeerBean peerBean:PeerListModel.peerBeans){
+                    if(peerBean.getNickName().equals(messageBean.getUserName())){
+                        Glide.with(itemView.getContext())
+                                .load(ImageUtil.getImageResId(peerBean.getUserImageId()))
+                                .into(mCivLeftHeadImage);
+                        break;
+                    }
+                }
+            }
+            else{
+                Glide.with(itemView.getContext())
+                        .load(ImageUtil.getImageResId(mTargetPeerImageId))
+                        .into(mCivLeftHeadImage);
+            }
             mTvLeftText.setText(messageBean.getText());
             if (mOnItemViewClickListener != null) {
                 mLlLeftTextLayout.setOnLongClickListener(new View.OnLongClickListener() {
@@ -423,9 +449,21 @@ public class MsgRvAdapter extends BaseRecyclerViewAdapter<MessageBean> {
 
         @Override
         protected void bindView(MessageBean messageBean) {
-            Glide.with(itemView.getContext())
-                    .load(ImageUtil.getImageResId(mTargetPeerImageId))
-                    .into(mCivLeftHeadImage);
+            if(messageBean.isGroupMsg()){
+                for(PeerBean peerBean:PeerListModel.peerBeans){
+                    if(peerBean.getNickName().equals(messageBean.getUserName())){
+                        Glide.with(itemView.getContext())
+                                .load(ImageUtil.getImageResId(peerBean.getUserImageId()))
+                                .into(mCivLeftHeadImage);
+                        break;
+                    }
+                }
+            }
+            else{
+                Glide.with(itemView.getContext())
+                        .load(ImageUtil.getImageResId(mTargetPeerImageId))
+                        .into(mCivLeftHeadImage);
+            }
             setIvLayoutParams(mIvLeftImage, messageBean.getImagePath());
             Glide.with(itemView.getContext())
                     .load(messageBean.getImagePath())
@@ -463,9 +501,21 @@ public class MsgRvAdapter extends BaseRecyclerViewAdapter<MessageBean> {
         @SuppressLint("SetTextI18n")
         @Override
         protected void bindView(MessageBean bean) {
-            Glide.with(itemView.getContext())
-                    .load(ImageUtil.getImageResId(mTargetPeerImageId))
-                    .into(mCivLeftHeadImage);
+            if(bean.isGroupMsg()){
+                for(PeerBean peerBean:PeerListModel.peerBeans){
+                    if(peerBean.getNickName().equals(bean.getUserName())){
+                        Glide.with(itemView.getContext())
+                                .load(ImageUtil.getImageResId(peerBean.getUserImageId()))
+                                .into(mCivLeftHeadImage);
+                        break;
+                    }
+                }
+            }
+            else{
+                Glide.with(itemView.getContext())
+                        .load(ImageUtil.getImageResId(mTargetPeerImageId))
+                        .into(mCivLeftHeadImage);
+            }
             mTvFileName.setText(bean.getFileName());
             mTvFileSize.setText(SDUtil.bytesTransform(bean.getFileSize()));
             mPbReceive.setVisibility(View.VISIBLE);
