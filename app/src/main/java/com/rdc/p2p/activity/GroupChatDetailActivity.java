@@ -325,6 +325,8 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
         mTvTitle.setText(groupBean.getNickName());
         // TODO MsgAdapter的用户头像需要新的适配器
         mMsgRvAdapter = new MsgRvAdapter(1);
+        mMsgRvAdapter.setGroupChat(true);
+        mMsgRvAdapter.setGroupBean(groupBean);
         LinearLayoutManager mLLManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRvMsgList.setLayoutManager(mLLManager);
         mRvMsgList.setAdapter(mMsgRvAdapter);
