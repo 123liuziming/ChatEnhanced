@@ -250,6 +250,11 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                                             textMsg.setMsgType(message.type()); // Protocol.TEXT
                                             textMsg.setText(message.content()); // getString(mEtInput)
                                             textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
+                                            if (textMsg.save()) {
+                                                showToast("成功保存到数据库！");
+                                            } else {
+                                                showToast("保存到数据库失败！");
+                                            }
                                             mMsgRvAdapter.appendData(textMsg);
                                         }
                                     });
