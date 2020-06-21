@@ -4,11 +4,14 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -72,6 +75,7 @@ import com.rdc.p2p.util.MediaPlayerUtil;
 import com.rdc.p2p.util.MyDnsUtil;
 import com.rdc.p2p.util.ProgressTextUtil;
 import com.rdc.p2p.util.SDUtil;
+import com.rdc.p2p.util.ChatDatabaseUtil;
 import com.rdc.p2p.widget.PlayerSoundView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -85,6 +89,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,6 +141,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     private PopupWindow mPwMicrophone;
     private boolean isSendingFile;//是否正在发送文件
     private PlayerSoundView mPsvIsPlaying = null;//正在播放音频的view
+    SQLiteOpenHelper openHelper;
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
@@ -205,7 +211,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mTargetPeerIp = peerIp;
         mTargetPeerImageId = peerImageId;
         mTargetpos = position;
-        context.startActivityForResult(new Intent(context, ChatDetailActivity.class), MainActivity.CHAT_DETAIL_ACTIVITY_CODE);
+        context.startActivityForResult(new Intent(context, ChatDetailActivity.class), 1);
     }
 
 
@@ -213,6 +219,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                openHelper.close();
                 onBackPressed(false);
                 break;
             case R.id.delete_chat:
@@ -250,11 +257,6 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                                             textMsg.setMsgType(message.type()); // Protocol.TEXT
                                             textMsg.setText(message.content()); // getString(mEtInput)
                                             textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
-                                            if (textMsg.save()) {
-                                                showToast("成功保存到数据库！");
-                                            } else {
-                                                showToast("保存到数据库失败！");
-                                            }
                                             mMsgRvAdapter.appendData(textMsg);
                                         }
                                     });
@@ -339,7 +341,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mRvMsgList.setLayoutManager(mLLManager);
         mRvMsgList.setAdapter(mMsgRvAdapter);
         mRvMsgList.getItemAnimator().setChangeDuration(0);
-        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ? and isGroupMsg = ?", mTargetPeerName, App.getUserBean().getNickName(), "0").find(MessageBean.class);
+        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ?", mTargetPeerName, App.getUserBean().getNickName()).find(MessageBean.class);
         mMsgRvAdapter.appendData(mRvMsgBeanList);
         mHandler.sendEmptyMessage(SCROLL_NOW);
         View view = View.inflate(this, R.layout.popupwindow_micorphone, null);
@@ -458,7 +460,25 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     mMsgRvAdapter.appendData(textMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
-                    EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp, false));
+                    try {
+                        SQLiteDatabase db = openHelper.getReadableDatabase();
+                        String userIp = textMsg.getUserIp();
+                        String friendIp = textMsg.getBelongIp();
+                        String content = textMsg.getText();
+                        int type = textMsg.getMsgType();
+                        Date date = textMsg.getDate();
+                        ContentValues values = new ContentValues();
+                        values.put("user_ip", userIp);
+                        values.put("friend_ip", friendIp);
+                        values.put("content", content);
+                        values.put("type", type);
+                        values.put("timedate", date.toString());
+                        db.insert("chat", null, values);
+                        db.close();
+                    } catch (Exception e){
+                        showToast("保存聊天记录出错");
+                    }
+                    EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp));
                     mEtInput.setText("");
                 }
             }
@@ -540,7 +560,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 audioMsg.setSendStatus(Constant.SEND_MSG_ING);
                 mMsgRvAdapter.appendData(audioMsg);
                 mHandler.sendEmptyMessage(SCROLL_NOW);
-                EventBus.getDefault().post(new RecentMsgEvent("语音", mTargetPeerIp, false));
+                EventBus.getDefault().post(new RecentMsgEvent("语音", mTargetPeerIp));
                 presenter.sendMsg(audioMsg, mMsgRvAdapter.getItemCount() - 1);
             }
         });
@@ -609,7 +629,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp, false));
+                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp));
                     presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
                 break;
@@ -622,7 +642,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp, false));
+                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp));
                     presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
                 break;
@@ -632,7 +652,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     MessageBean fileMsg = MessageBean.getInstance(mTargetPeerIp);
                     fileMsg.setMine(true);
                     fileMsg.setMsgType(Protocol.FILE);
-                    fileMsg.setUserIp(mTargetPeerIp);//这里得设置为对方ip，否则在本窗口下 void iv_take_photo_act_chat_detail_group(MessageBean messageBean) 会丢弃此消息
+                    fileMsg.setUserIp(mTargetPeerIp);//这里得设置为对方ip，否则在本窗口下 void receiveMessage(MessageBean messageBean) 会丢弃此消息
                     fileMsg.setFilePath(SDUtil.getFilePathByUri(ChatDetailActivity.this, data.getData()));
                     fileMsg.setFileName(SDUtil.checkFileName(mMsgRvAdapter.getFileNameList(), fileMsg.getFilePath()));
                     fileMsg.setFileSize(SDUtil.getFileByteSize(fileMsg.getFilePath()));
@@ -640,7 +660,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     fileMsg.setFileState(FileState.SEND_FILE_ING);
                     mMsgRvAdapter.appendData(fileMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("文件", mTargetPeerIp, false));
+                    EventBus.getDefault().post(new RecentMsgEvent("文件", mTargetPeerIp));
                     presenter.sendMsg(fileMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
                 break;
@@ -764,10 +784,6 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveMessage(MessageBean messageBean) {
-        // TODO 先用一个最简单粗暴的方法测试，后续需要一个新的事件
-        if(messageBean.isGroupMessage()){
-            return;
-        }
         if (messageBean.getUserIp().equals(mTargetPeerIp)) {
             if (messageBean.getMsgType() == Protocol.FILE) {
                 if (messageBean.getFileState() == FileState.RECEIVE_FILE_START) {
@@ -785,7 +801,6 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 }
             } else {
                 //其他消息直接添加到数据源中并更新RecyclerView界面
-                Log.d(TAG, "receiveMessage: 接收到个人聊天其他信息");
                 mMsgRvAdapter.appendData(messageBean);
                 mHandler.sendEmptyMessage(SCROLL);
             }
