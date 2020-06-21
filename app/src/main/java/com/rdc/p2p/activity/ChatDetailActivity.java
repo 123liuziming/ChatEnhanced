@@ -211,7 +211,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mTargetPeerIp = peerIp;
         mTargetPeerImageId = peerImageId;
         mTargetpos = position;
-        context.startActivityForResult(new Intent(context, ChatDetailActivity.class), 1);
+        context.startActivityForResult(new Intent(context, ChatDetailActivity.class), MainActivity.CHAT_DETAIL_ACTIVITY_CODE);
     }
 
 
@@ -257,6 +257,11 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                                             textMsg.setMsgType(message.type()); // Protocol.TEXT
                                             textMsg.setText(message.content()); // getString(mEtInput)
                                             textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
+                                            if (textMsg.save()) {
+                                                showToast("成功保存到数据库！");
+                                            } else {
+                                                showToast("保存到数据库失败！");
+                                            }
                                             mMsgRvAdapter.appendData(textMsg);
                                         }
                                     });
@@ -341,7 +346,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         mRvMsgList.setLayoutManager(mLLManager);
         mRvMsgList.setAdapter(mMsgRvAdapter);
         mRvMsgList.getItemAnimator().setChangeDuration(0);
-        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ?", mTargetPeerName, App.getUserBean().getNickName()).find(MessageBean.class);
+        List<MessageBean> mRvMsgBeanList = DataSupport.where("belongName = ? and userName = ? and isGroupMsg = ?", mTargetPeerName, App.getUserBean().getNickName(), "0").find(MessageBean.class);
         mMsgRvAdapter.appendData(mRvMsgBeanList);
         mHandler.sendEmptyMessage(SCROLL_NOW);
         View view = View.inflate(this, R.layout.popupwindow_micorphone, null);
@@ -478,7 +483,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     } catch (Exception e){
                         showToast("保存聊天记录出错");
                     }
-                    EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp));
+                    EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp,false));
                     mEtInput.setText("");
                 }
             }
@@ -560,7 +565,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 audioMsg.setSendStatus(Constant.SEND_MSG_ING);
                 mMsgRvAdapter.appendData(audioMsg);
                 mHandler.sendEmptyMessage(SCROLL_NOW);
-                EventBus.getDefault().post(new RecentMsgEvent("语音", mTargetPeerIp));
+                EventBus.getDefault().post(new RecentMsgEvent("语音", mTargetPeerIp, false));
                 presenter.sendMsg(audioMsg, mMsgRvAdapter.getItemCount() - 1);
             }
         });
@@ -629,7 +634,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp));
+                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp, false));
                     presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
                 break;
@@ -642,7 +647,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     imageMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(imageMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp));
+                    EventBus.getDefault().post(new RecentMsgEvent("图片", mTargetPeerIp, false));
                     presenter.sendMsg(imageMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
                 break;
@@ -660,7 +665,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     fileMsg.setFileState(FileState.SEND_FILE_ING);
                     mMsgRvAdapter.appendData(fileMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    EventBus.getDefault().post(new RecentMsgEvent("文件", mTargetPeerIp));
+                    EventBus.getDefault().post(new RecentMsgEvent("文件", mTargetPeerIp, false));
                     presenter.sendMsg(fileMsg, mMsgRvAdapter.getItemCount() - 1);
                 }
                 break;
@@ -784,6 +789,10 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveMessage(MessageBean messageBean) {
+        // TODO 先用一个最简单粗暴的方法测试，后续需要一个新的事件
+        if(messageBean.isGroupMessage()){
+            return;
+        }
         if (messageBean.getUserIp().equals(mTargetPeerIp)) {
             if (messageBean.getMsgType() == Protocol.FILE) {
                 if (messageBean.getFileState() == FileState.RECEIVE_FILE_START) {
