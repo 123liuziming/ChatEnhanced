@@ -246,38 +246,38 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                             public void onResponse(@NotNull Response<MessagesBetweenQuery.Data> response) {
                                 Log.d(TAG, response.getData().toString());
                                 if (response.getData().MessagesBetween() != null) {
-                                try {
+                                    try {
 //                                    ArrayList<MessagesBetweenQuery.MessagesBetween> mock = new ArrayList<>();
 //                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename1", "content1", "sender1", "receiver1", "time1", Protocol.TEXT));
 //                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename2", "content2", "sender2", "receiver2", "time2", Protocol.TEXT));
 //                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename3", "content3", "sender3", "receiver3", "time3", Protocol.TEXT));
 
-                                    runOnUiThread(() -> {
-                                        for (MessagesBetweenQuery.MessagesBetween message : response.getData().MessagesBetween()) { // mock
-                                            MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
-                                            textMsg.setMine(message.sender().equals(App.getUserBean().getNickName())); // send by me
-                                            textMsg.setMsgType(message.type()); // Protocol.TEXT
-                                            textMsg.setText(message.content()); // getString(mEtInput)
-                                            textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
-                                            textMsg.setGroupMsg(false);
-                                            textMsg.setUserName(App.getUserBean().getNickName());
-                                            if (textMsg.save()) {
-                                                showToast("成功保存到数据库！");
-                                            } else {
-                                                showToast("保存到数据库失败！");
+                                        runOnUiThread(() -> {
+                                            for (MessagesBetweenQuery.MessagesBetween message : response.getData().MessagesBetween()) { // mock
+                                                MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
+                                                textMsg.setMine(message.sender().equals(App.getUserBean().getNickName())); // send by me
+                                                textMsg.setMsgType(message.type()); // Protocol.TEXT
+                                                textMsg.setText(message.content()); // getString(mEtInput)
+                                                textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
+                                                textMsg.setGroupMsg(false);
+                                                textMsg.setUserName(App.getUserBean().getNickName());
+                                                if (textMsg.save()) {
+                                                    showToast("成功保存到数据库！");
+                                                } else {
+                                                    showToast("保存到数据库失败！");
+                                                }
+                                                mMsgRvAdapter.appendData(textMsg);
                                             }
-                                            mMsgRvAdapter.appendData(textMsg);
-                                        }
-                                    });
-                                    Looper.prepare();
-                                    showToast("拉取了" + response.getData().MessagesBetween().size() + "条信息！");
-                                    Looper.loop();
-                                } catch (NullPointerException e) {
-                                    Log.e(TAG, e.getLocalizedMessage(), e);
-                                    Looper.prepare();
-                                    showToast("拉取失败！");
-                                    Looper.loop();
-                                }
+                                        });
+                                        Looper.prepare();
+                                        showToast("拉取了" + response.getData().MessagesBetween().size() + "条信息！");
+                                        Looper.loop();
+                                    } catch (NullPointerException e) {
+                                        Log.e(TAG, e.getLocalizedMessage(), e);
+                                        Looper.prepare();
+                                        showToast("拉取失败！");
+                                        Looper.loop();
+                                    }
                                 } else {
                                     Looper.prepare();
                                     showToast("拉取失败！");
@@ -306,46 +306,49 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         ApolloClient apolloClient = ApolloClient.builder().serverUrl("http://49.232.12.147:4000").build();
         List<MessageBean> msgList = mMsgRvAdapter.getDataList();
         final List<MessageInput> messageInputs = new ArrayList<MessageInput>();
-        for (MessageBean msgBean : msgList){
-            final MessageInput messageInput = MessageInput.builder()
-                    .content(msgBean.getText())
-                    .sender(msgBean.getUserName())
-                    .receiver(msgBean.getBelongName())
-                    .time(msgBean.getTime())
-                    .type(msgBean.getMsgType())
-                    .build();
-            messageInputs.add(messageInput);
+        for (MessageBean msgBean : msgList) {
+            if (msgList.size() != 0) {
+                final MessageInput messageInput = MessageInput.builder()
+                        .content(msgBean.getText())
+                        .sender(msgBean.getUserName())
+                        .receiver(msgBean.getBelongName())
+                        .time(msgBean.getTime())
+                        .type(msgBean.getMsgType())
+                        .build();
+                messageInputs.add(messageInput);
+            }
         }
-        final SaveMessagesMutation SaveMessages = SaveMessagesMutation.builder()
-                .initiator(App.getUserBean().getNickName())
-                .messages(messageInputs)
-                .build();
-        apolloClient.mutate(SaveMessages);
-        showToast("向云端推送了" + mMsgRvAdapter.getDataList().size() + "条信息！");
-        Log.d(TAG,"推送了" + mMsgRvAdapter.getDataList().size() + "条信息！");
+        if(msgList.size() != 0) {
+            final SaveMessagesMutation SaveMessages = SaveMessagesMutation.builder()
+                    .initiator(App.getUserBean().getNickName())
+                    .messages(messageInputs)
+                    .build();
+            apolloClient.mutate(SaveMessages);
+            showToast("向云端推送了" + mMsgRvAdapter.getDataList().size() + "条信息！");
+            Log.d(TAG, "推送了" + mMsgRvAdapter.getDataList().size() + "条信息！");
+        }
+
         /***
-        .enqueue(new ApolloCall.Callback<SaveMessages.Data>(){
-            @Override
-            public void onResponse(@NotNull Response<SaveMessages.Data> response) {
-                Log.d(TAG, response.toString());
-                try {
-                    Looper.prepare();
-                    showToast("推送了" + mMsgRvAdapter.getDataList().size() + "条信息！");
-                    Looper.loop();
-                } catch (NullPointerException e) {
-                    Log.e(TAG, e.getLocalizedMessage(), e);
-                    Looper.prepare();
-                    showToast("推送失败！");
-                    Looper.loop();
-                }
-            }
-            @Override
-            public void onFailure(@NotNull ApolloException e) {
-                Log.e(TAG, e.getLocalizedMessage(), e);
-                Looper.prepare();
-                showToast("推送失败！");
-                Looper.loop();
-            }
+         .enqueue(new ApolloCall.Callback<SaveMessages.Data>(){
+        @Override public void onResponse(@NotNull Response<SaveMessages.Data> response) {
+        Log.d(TAG, response.toString());
+        try {
+        Looper.prepare();
+        showToast("推送了" + mMsgRvAdapter.getDataList().size() + "条信息！");
+        Looper.loop();
+        } catch (NullPointerException e) {
+        Log.e(TAG, e.getLocalizedMessage(), e);
+        Looper.prepare();
+        showToast("推送失败！");
+        Looper.loop();
+        }
+        }
+        @Override public void onFailure(@NotNull ApolloException e) {
+        Log.e(TAG, e.getLocalizedMessage(), e);
+        Looper.prepare();
+        showToast("推送失败！");
+        Looper.loop();
+        }
         });***/
 
 
@@ -524,25 +527,25 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
                     /***
-                    try {
-                        SQLiteDatabase db = openHelper.getReadableDatabase();
-                        String userIp = textMsg.getUserIp();
-                        String friendIp = textMsg.getBelongIp();
-                        String content = textMsg.getText();
-                        int type = textMsg.getMsgType();
-                        Date date = textMsg.getDate();
-                        ContentValues values = new ContentValues();
-                        values.put("user_ip", userIp);
-                        values.put("friend_ip", friendIp);
-                        values.put("content", content);
-                        values.put("type", type);
-                        values.put("timedate", date.toString());
-                        db.insert("chat", null, values);
-                        db.close();
-                    } catch (Exception e){
-                        showToast("保存聊天记录出错");
-                    }***/
-                    EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp,false));
+                     try {
+                     SQLiteDatabase db = openHelper.getReadableDatabase();
+                     String userIp = textMsg.getUserIp();
+                     String friendIp = textMsg.getBelongIp();
+                     String content = textMsg.getText();
+                     int type = textMsg.getMsgType();
+                     Date date = textMsg.getDate();
+                     ContentValues values = new ContentValues();
+                     values.put("user_ip", userIp);
+                     values.put("friend_ip", friendIp);
+                     values.put("content", content);
+                     values.put("type", type);
+                     values.put("timedate", date.toString());
+                     db.insert("chat", null, values);
+                     db.close();
+                     } catch (Exception e){
+                     showToast("保存聊天记录出错");
+                     }***/
+                    EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp, false));
                     mEtInput.setText("");
                 }
             }
@@ -849,7 +852,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveMessage(MessageBean messageBean) {
         // TODO 先用一个最简单粗暴的方法测试，后续需要一个新的事件
-        if(messageBean.isGroupMessage()){
+        if (messageBean.isGroupMessage()) {
             return;
         }
         if (messageBean.getUserIp().equals(mTargetPeerIp)) {
