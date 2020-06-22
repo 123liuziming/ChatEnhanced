@@ -1,0 +1,4 @@
+mutation SaveMessages($initiator: String!, $messages: [MessageInput]) {
+   SaveMessages(initiator: $indicator, messages: $messages) {
+   }
+}

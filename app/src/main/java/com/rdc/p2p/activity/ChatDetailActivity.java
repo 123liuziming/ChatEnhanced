@@ -52,6 +52,7 @@ import com.apollographql.apollo.ApolloClient;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.example.MessagesBetweenQuery;
+import com.example.SaveMessagesMutation;
 import com.rdc.p2p.R;
 import com.rdc.p2p.adapter.MsgRvAdapter;
 import com.rdc.p2p.adapter.PeerListRvAdapter;
@@ -294,6 +295,37 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     }
 
     public void onBackPressed(boolean flag) {
+        ApolloClient apolloClient = ApolloClient.builder().serverUrl("http://49.232.12.147:4000").build();
+        final SaveMessagesMutation SaveMessages = SaveMessagesMutation.builder()
+                .initiator(App.getUserBean().getNickName())
+                .messages(mMsgRvAdapter.getDataList())
+                .build();
+
+        //Log.d(TAG, "用户A：" + App.getUserBean().getNickName());
+        //Log.d(TAG, "用户B：" + mTargetPeerName);
+        apolloClient.mutate(SaveMessages).enqueue(new ApolloCall.Callback<SaveMessages.Data>(){
+            @Override
+            public void onResponse(@NotNull Response<SaveMessages.Data> response) {
+                Log.d(TAG, response.toString());
+                try {
+                    Looper.prepare();
+                    showToast("推送了" + mMsgRvAdapter.getDataList().size() + "条信息！");
+                    Looper.loop();
+                } catch (NullPointerException e) {
+                    Log.e(TAG, e.getLocalizedMessage(), e);
+                    Looper.prepare();
+                    showToast("推送失败！");
+                    Looper.loop();
+                }
+            }
+            @Override
+            public void onFailure(@NotNull ApolloException e) {
+                Log.e(TAG, e.getLocalizedMessage(), e);
+                Looper.prepare();
+                showToast("推送失败！");
+                Looper.loop();
+            }
+        });
         if (flag) {
             Intent intent = new Intent();
             intent.putExtra("ip", mTargetPeerIp);
@@ -465,6 +497,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     mMsgRvAdapter.appendData(textMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
                     presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
+                    /***
                     try {
                         SQLiteDatabase db = openHelper.getReadableDatabase();
                         String userIp = textMsg.getUserIp();
@@ -482,7 +515,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                         db.close();
                     } catch (Exception e){
                         showToast("保存聊天记录出错");
-                    }
+                    }***/
                     EventBus.getDefault().post(new RecentMsgEvent(getString(mEtInput), mTargetPeerIp,false));
                     mEtInput.setText("");
                 }
