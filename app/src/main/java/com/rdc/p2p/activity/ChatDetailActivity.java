@@ -245,6 +245,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                             @Override
                             public void onResponse(@NotNull Response<MessagesBetweenQuery.Data> response) {
                                 Log.d(TAG, response.getData().toString());
+                                if (response.getData().MessagesBetween() != null) {
                                 try {
 //                                    ArrayList<MessagesBetweenQuery.MessagesBetween> mock = new ArrayList<>();
 //                                    mock.add(new MessagesBetweenQuery.MessagesBetween("typename1", "content1", "sender1", "receiver1", "time1", Protocol.TEXT));
@@ -273,6 +274,11 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                                     Looper.loop();
                                 } catch (NullPointerException e) {
                                     Log.e(TAG, e.getLocalizedMessage(), e);
+                                    Looper.prepare();
+                                    showToast("拉取失败！");
+                                    Looper.loop();
+                                }
+                                } else {
                                     Looper.prepare();
                                     showToast("拉取失败！");
                                     Looper.loop();
