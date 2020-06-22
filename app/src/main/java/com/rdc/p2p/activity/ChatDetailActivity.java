@@ -254,10 +254,12 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                                     runOnUiThread(() -> {
                                         for (MessagesBetweenQuery.MessagesBetween message : response.getData().MessagesBetween()) { // mock
                                             MessageBean textMsg = MessageBean.getInstance(mTargetPeerIp);
-                                            textMsg.setMine(message.sender() == App.getUserBean().getNickName()); // send by me
+                                            textMsg.setMine(message.sender().equals(App.getUserBean().getNickName())); // send by me
                                             textMsg.setMsgType(message.type()); // Protocol.TEXT
                                             textMsg.setText(message.content()); // getString(mEtInput)
                                             textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
+                                            textMsg.setGroupMsg(false);
+                                            textMsg.setUserName(App.getUserBean().getNickName());
                                             if (textMsg.save()) {
                                                 showToast("成功保存到数据库！");
                                             } else {
@@ -301,8 +303,8 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
         for (MessageBean msgBean : msgList){
             final MessageInput messageInput = MessageInput.builder()
                     .content(msgBean.getText())
-                    .sender(msgBean.getBelongName())
-                    .receiver(msgBean.getUserName())
+                    .sender(msgBean.getUserName())
+                    .receiver(msgBean.getBelongName())
                     .time(msgBean.getTime())
                     .type(msgBean.getMsgType())
                     .build();
