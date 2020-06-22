@@ -46,7 +46,7 @@ import java.util.Objects;
 import butterknife.BindView;
 
 /**
- * Created by Lin Yaotian on 2018/5/16.
+ *   2018/5/16.
  */
 public class PeerListFragment extends BaseFragment<PeerListPresenter> implements PeerListContract.View  {
 

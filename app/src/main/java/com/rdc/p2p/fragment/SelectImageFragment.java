@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Lin Yaotian on 2018/5/1.
+ *   2018/5/1.
  * 登录时选择头像界面
  */
 public class SelectImageFragment extends DialogFragment {

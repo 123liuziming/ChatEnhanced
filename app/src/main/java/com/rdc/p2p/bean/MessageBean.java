@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by Lin Yaotian on 2018/5/16.
+ *   2018/5/16.
  */
 public class MessageBean extends DataSupport implements Cloneable {
     private String groupName;

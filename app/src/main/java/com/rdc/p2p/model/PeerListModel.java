@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created by Lin Yaotian on 2018/5/16.
+ *   2018/5/16.
  */
 public class PeerListModel implements PeerListContract.Model {
 

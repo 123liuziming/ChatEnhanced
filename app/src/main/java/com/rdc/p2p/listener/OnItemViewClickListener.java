@@ -5,7 +5,7 @@ import android.view.View;
 import com.rdc.p2p.widget.PlayerSoundView;
 
 /**
- * Created by Lin Yaotian on 2018/5/30.
+ *   2018/5/30.
  */
 public interface OnItemViewClickListener {
     void onImageClick(int position);

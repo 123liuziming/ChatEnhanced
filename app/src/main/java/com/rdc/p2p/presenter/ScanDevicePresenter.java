@@ -8,7 +8,7 @@ import com.rdc.p2p.model.ScanDeviceModel;
 import java.util.List;
 
 /**
- * Created by Lin Yaotian on 2018/5/14.
+ *   2018/5/14.
  */
 public class ScanDevicePresenter extends BasePresenter<ScanDeviceContract.View> implements ScanDeviceContract.Presenter {
 

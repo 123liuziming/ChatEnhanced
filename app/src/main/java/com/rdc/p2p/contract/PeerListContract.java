@@ -6,7 +6,7 @@ import com.rdc.p2p.bean.PeerBean;
 import java.util.List;
 
 /**
- * Created by Lin Yaotian on 2018/5/16.
+ *   2018/5/16.
  */
 public interface PeerListContract {
 

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Lin Yaotian on 2018/5/14.
+ *   2018/5/14.
  */
 public class ScanDeviceModel extends BaseModel implements ScanDeviceContract.Model {
 

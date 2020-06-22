@@ -1,7 +1,7 @@
 package com.rdc.p2p.config;
 
 /**
- * Created by Lin Yaotian on 2018/5/17.
+ *    2020.6
  */
 public class Protocol {
 

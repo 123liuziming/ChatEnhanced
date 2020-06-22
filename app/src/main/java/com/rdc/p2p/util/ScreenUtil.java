@@ -6,7 +6,7 @@ import android.util.DisplayMetrics;
 import java.lang.reflect.Field;
 
 /**
- * Created by Lin Yaotian on 2018/5/25.
+ *   2018/5/25.
  */
 public class ScreenUtil {
     /**

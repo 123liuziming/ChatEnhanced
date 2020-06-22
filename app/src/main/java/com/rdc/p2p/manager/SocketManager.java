@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by Lin Yaotian on 2018/5/17.
+ *    2020.6
  */
 public class SocketManager {
 

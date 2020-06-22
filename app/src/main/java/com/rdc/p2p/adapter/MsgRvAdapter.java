@@ -35,7 +35,7 @@ import butterknife.BindView;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
- * Created by Lin Yaotian on 2018/2/1.
+ *   2018/2/1.
  */
 
 public class MsgRvAdapter extends BaseRecyclerViewAdapter<MessageBean> {
