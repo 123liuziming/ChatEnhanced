@@ -24,7 +24,7 @@ import com.rdc.p2p.base.BasePresenter;
 import butterknife.BindView;
 
 /**
- * Created by Lin Yaotian on 2018/5/25.
+ *   2018/5/25.
  */
 public class PhotoFragment extends BaseFragment {
 

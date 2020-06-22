@@ -11,7 +11,7 @@ import com.rdc.p2p.util.ImageUtil;
 import com.zxy.tiny.callback.FileCallback;
 
 /**
- * Created by Lin Yaotian on 2018/5/17.
+ *   2020.6
  */
 public class ChatDetailPresenter extends BasePresenter<ChatDetailContract.View> implements ChatDetailContract.Presenter {
 

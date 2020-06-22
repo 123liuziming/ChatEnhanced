@@ -8,7 +8,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 /**
- * Created by Lin Yaotian on 2018/5/25.
+ *   2018/5/25.
  */
 public class PhotosVP extends ViewPager {
     public PhotosVP(@NonNull Context context) {

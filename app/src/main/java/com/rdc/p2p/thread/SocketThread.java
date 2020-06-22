@@ -60,7 +60,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created by Lin Yaotian on 2018/5/20.
+ *   2018/5/20.
  */
 public class SocketThread extends Thread {
 

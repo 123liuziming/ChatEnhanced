@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by Lin Yaotian on 2018/5/20.
+ *   2018/5/20.
  */
 public class AudioRecorderUtil {
 

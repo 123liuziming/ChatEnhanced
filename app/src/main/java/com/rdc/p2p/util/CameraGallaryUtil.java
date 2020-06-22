@@ -10,7 +10,7 @@ import android.os.Environment;
 import java.io.File;
 
 /**
- * Created by Lin Yaotian on 2018/5/18.
+ *   2018/5/18.
  */
 public class CameraGallaryUtil {
     private static final int RESULT_OK = -1;

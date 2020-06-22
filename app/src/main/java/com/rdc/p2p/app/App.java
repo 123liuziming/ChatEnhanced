@@ -11,7 +11,7 @@ import com.rdc.p2p.util.UserUtil;
 import org.litepal.LitePal;
 
 /**
- * Created by Lin Yaotian on 2018/5/1.
+ *   2018/5/1.
  */
 
 public class App extends Application {

@@ -21,7 +21,7 @@ import q.rorbin.badgeview.Badge;
 import q.rorbin.badgeview.QBadgeView;
 
 /**
- * Created by Lin Yaotian on 2018/5/16.
+ *   2018/5/16.
  */
 public class PeerListRvAdapter extends BaseRecyclerViewAdapter<PeerBean> {
 

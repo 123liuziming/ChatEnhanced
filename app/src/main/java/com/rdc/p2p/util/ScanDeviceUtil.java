@@ -1,7 +1,7 @@
 package com.rdc.p2p.util;
 
 /**
- * Created by Lin Yaotian on 2018/5/14.
+ *   2018/5/14.
  */
 import java.net.Inet4Address;
 import java.net.InetAddress;

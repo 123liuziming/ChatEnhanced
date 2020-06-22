@@ -3,7 +3,7 @@ package com.rdc.p2p.listener;
 import com.rdc.p2p.bean.MessageBean;
 
 /**
- * Created by Lin Yaotian on 2018/5/30.
+ *   2018/5/30.
  */
 public interface OnSocketSendCallback {
 

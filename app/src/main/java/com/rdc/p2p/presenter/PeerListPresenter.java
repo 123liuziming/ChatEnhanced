@@ -11,7 +11,7 @@ import com.rdc.p2p.model.PeerListModel;
 import java.util.List;
 
 /**
- * Created by Lin Yaotian on 2018/5/16.
+ *   2018/5/16.
  */
 public class PeerListPresenter extends BasePresenter<PeerListContract.View> implements PeerListContract.Presenter {
 
