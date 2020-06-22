@@ -260,9 +260,11 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                                                 textMsg.setText(message.content()); // getString(mEtInput)
                                                 textMsg.setSendStatus(Constant.SEND_MSG_FINISH);
                                                 textMsg.setGroupMsg(false);
+                                                textMsg.getDate();
+                                                textMsg.setTime(message.time());
                                                 textMsg.setUserName(App.getUserBean().getNickName());
                                                 if (textMsg.save()) {
-                                                    showToast("成功保存到数据库！");
+                                                    //showToast("成功保存到数据库！");
                                                 } else {
                                                     showToast("保存到数据库失败！");
                                                 }

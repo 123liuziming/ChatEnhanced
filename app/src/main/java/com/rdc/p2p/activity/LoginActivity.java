@@ -182,7 +182,7 @@ public class LoginActivity extends BaseActivity {
                                 public void onResponse(@NotNull Response<LoginQuery.Data> response) {
                                     Log.d(TAG, response.getData().toString());
                                     // TODO 这里为了方便测试，先把登录功能取消了
-                                    if (response.getData().Login() == null) {
+                                    if (response.getData().Login() != null) {
                                         UserBean userBean = new UserBean();
                                         userBean.setNickName(getString(mEtNickname));
                                         userBean.setUserImageId(mSelectedImageId);
