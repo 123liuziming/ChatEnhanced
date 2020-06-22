@@ -1,4 +1,4 @@
 mutation SaveMessages($initiator: String!, $messages: [MessageInput]) {
-   SaveMessages(initiator: $indicator, messages: $messages) {
+   SaveMessages(initiator: $initiator, messages: $messages) {
    }
 }

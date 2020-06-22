@@ -53,6 +53,7 @@ import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.example.MessagesBetweenQuery;
 import com.example.SaveMessagesMutation;
+import com.example.type.MessageInput;
 import com.rdc.p2p.R;
 import com.rdc.p2p.adapter.MsgRvAdapter;
 import com.rdc.p2p.adapter.PeerListRvAdapter;
@@ -220,7 +221,6 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                openHelper.close();
                 onBackPressed(false);
                 break;
             case R.id.delete_chat:
@@ -296,14 +296,27 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
 
     public void onBackPressed(boolean flag) {
         ApolloClient apolloClient = ApolloClient.builder().serverUrl("http://49.232.12.147:4000").build();
+        List<MessageBean> msgList = mMsgRvAdapter.getDataList();
+        final List<MessageInput> messageInputs = new ArrayList<MessageInput>();
+        for (MessageBean msgBean : msgList){
+            final MessageInput messageInput = MessageInput.builder()
+                    .content(msgBean.getText())
+                    .sender(msgBean.getBelongName())
+                    .receiver(msgBean.getUserName())
+                    .time(msgBean.getTime())
+                    .type(msgBean.getMsgType())
+                    .build();
+            messageInputs.add(messageInput);
+        }
         final SaveMessagesMutation SaveMessages = SaveMessagesMutation.builder()
                 .initiator(App.getUserBean().getNickName())
-                .messages(mMsgRvAdapter.getDataList())
+                .messages(messageInputs)
                 .build();
-
-        //Log.d(TAG, "用户A：" + App.getUserBean().getNickName());
-        //Log.d(TAG, "用户B：" + mTargetPeerName);
-        apolloClient.mutate(SaveMessages).enqueue(new ApolloCall.Callback<SaveMessages.Data>(){
+        apolloClient.mutate(SaveMessages);
+        showToast("向云端推送了" + mMsgRvAdapter.getDataList().size() + "条信息！");
+        Log.d(TAG,"推送了" + mMsgRvAdapter.getDataList().size() + "条信息！");
+        /***
+        .enqueue(new ApolloCall.Callback<SaveMessages.Data>(){
             @Override
             public void onResponse(@NotNull Response<SaveMessages.Data> response) {
                 Log.d(TAG, response.toString());
@@ -325,7 +338,12 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                 showToast("推送失败！");
                 Looper.loop();
             }
-        });
+        });***/
+
+
+        //Log.d(TAG, "用户A：" + App.getUserBean().getNickName());
+        //Log.d(TAG, "用户B：" + mTargetPeerName);
+
         if (flag) {
             Intent intent = new Intent();
             intent.putExtra("ip", mTargetPeerIp);
