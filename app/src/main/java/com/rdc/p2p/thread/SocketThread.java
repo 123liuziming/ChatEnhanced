@@ -154,6 +154,10 @@ public class SocketThread extends Thread {
             dos.writeInt(messageBean.getMsgType());
             switch (messageBean.getMsgType()) {
                 case Protocol.TEXT:
+                    if(messageBean.isGroupMessage())
+                        Log.d(TAG, "现在开始发送群聊消息：" + messageBean.getUserName());
+                    else
+                        Log.d(TAG, "现在开始发送消息："+messageBean.getUserName());
                     state = new TextMsgState(messageBean, mOnSocketSendCallback, position, dos);
                     sendMsgContext.setState(state);
                     sendMsgContext.request();

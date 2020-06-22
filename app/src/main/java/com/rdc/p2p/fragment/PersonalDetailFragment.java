@@ -91,7 +91,6 @@ public class PersonalDetailFragment extends BaseFragment {
         ipData.setText("本次登录IP: " + App.getMyIP());
         Glide.with(this).load(ImageUtil.getImageResId(App.getUserBean().getUserImageId())).into(mCivUserImage);
         Bitmap sampleImg = BitmapFactory.decodeResource(getResources(), ImageUtil.getImageResId(App.getUserBean().getUserImageId()));
-        Glide.with(this).load(sampleImg).into(mCivUserImage);
         sampleImg = blur(sampleImg,14);
         mImage.setImageBitmap(sampleImg);
         //        Glide.with(this)

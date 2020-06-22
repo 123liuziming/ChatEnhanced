@@ -110,7 +110,7 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
     ImageView mIvRecordVoice;
     @BindView(R.id.rv_msg_list_act_chat_detail)
     RecyclerView mRvMsgList;
-    @BindView(R.id.btn_send_chat_detail)
+    @BindView(R.id.btn_send_chat_detail_group)
     Button mBtnSend;
     @BindView(R.id.et_input_act_chat_detail)
     EditText mEtInput;
@@ -455,12 +455,15 @@ public class GroupChatDetailActivity extends BaseActivity<GroupChatDetailPresent
                     textMsg.setGroupName(groupBean.getNickName());
                     mMsgRvAdapter.appendData(textMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
-                    for (PeerBean peerBean:groupBean.getPeerBeanList()) {
-                        if(peerBean.getNickName().equals(App.getUserBean().getNickName()))
-                            continue;
-                        textMsg.setUserIp(peerBean.getUserIp());
-                        presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
-                    }
+//                    for (PeerBean peerBean:groupBean.getPeerBeanList()) {
+//                        if(peerBean.getNickName().equals(App.getUserBean().getNickName()))
+//                            continue;
+//                        Log.d(TAG, "现在开始产生群聊消息:"+peerBean.getNickName());
+//                        textMsg.setUserIp(peerBean.getUserIp());
+//                        textMsg.setUserName(peerBean.getNickName());
+//                        presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
+//                    }
+                    presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
                     EventBus.getDefault().postSticky(new RecentGroupMsgEvent(getString(mEtInput), groupBean.getNickName()));
                     mEtInput.setText("");
                 }

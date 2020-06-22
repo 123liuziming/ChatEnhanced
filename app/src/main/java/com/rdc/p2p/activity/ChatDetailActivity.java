@@ -527,6 +527,7 @@ public class ChatDetailActivity extends BaseActivity<ChatDetailPresenter> implem
                     textMsg.setSendStatus(Constant.SEND_MSG_ING);
                     mMsgRvAdapter.appendData(textMsg);
                     mHandler.sendEmptyMessage(SCROLL_NOW);
+                    Log.d(TAG, "现在开始产生消息:"+textMsg.getUserName());
                     presenter.sendMsg(textMsg, mMsgRvAdapter.getItemCount() - 1);
                     /***
                      try {
